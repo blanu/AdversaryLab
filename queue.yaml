@@ -1,0 +1,4 @@
+total_storage_limit: 120M
+queue:
+- name: process
+  rate: 35/s

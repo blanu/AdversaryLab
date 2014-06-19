@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>FreefallDB</title>
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/style.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <button id="addDbButton">Add database</button>
+    <div class="hidden" id="addDbDialog">
+      Database name: <input type="text" id="addDbNameField"/>
+    </div>
+    <ul id="dbs">
+    </ul>
+  </body>
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="http://omgwerock.com/~gah/web2peer/web2peer.js"></script>
+  <script type="text/javascript" src="/lib/debug.js"></script>
+  <script type="text/javascript" src="/static/freefall.js"></script>
+  <script type="text/javascript">
+    userid="$userid";
+  </script>
+  <script type="text/javascript" src="/static/index.js"></script>
+</html>

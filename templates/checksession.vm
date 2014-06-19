@@ -1,0 +1,14 @@
+<html>
+  <head>
+    <title>Welcome | FreefallDB - A cloud database for app development without a paracute</title>
+  </head>
+  <body>
+    <script language="javascript">
+      #if($success)
+        window.parent.postMessage({'success': true, 'sessionid': '$sessionid'}, '*');
+      #else
+        window.parent.postMessage({'success': false}, '*');
+      #end
+    </script>
+  </body>
+</html>

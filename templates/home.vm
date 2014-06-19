@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <title>Shared Machines</title>
+  </head>
+  <body>
+    <ul>
+      #foreach($instance in $instances)
+        <li><a href="/home/$instance.id">$instance.name</a></li>
+      #end
+    </ul>
+  </body>
+</html>
