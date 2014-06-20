@@ -2,7 +2,7 @@ import logging
 
 from google.appengine.api import users
 from google.appengine.ext import webapp
-from django.utils.simplejson import loads, dumps
+from json import loads, dumps
 
 from airspeed import CachingFileLoader
 from jsonrpc.handler import JSONRPC

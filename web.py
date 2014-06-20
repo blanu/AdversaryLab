@@ -7,14 +7,15 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 
-from api import *
+from pages import *
 
-application = webapp.WSGIApplication([
+app = webapp.WSGIApplication([
   ('/', Index),
   ('/index.html', Index),
   ('/welcome', Welcome),
   ('/login', Login),
-  ('/dashboard', DashboardIndex)
+  ('/dashboard', DashboardIndex),
+  ('/upload', Upload)
 ], debug=True)
 
 def main():

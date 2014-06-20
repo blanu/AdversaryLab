@@ -15,7 +15,7 @@ from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.api import users
 from google.appengine.api import mail
-from django.utils.simplejson import loads, dumps
+from json import loads, dumps
 
 from airspeed import CachingFileLoader
 
