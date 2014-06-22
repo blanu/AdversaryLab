@@ -48,9 +48,22 @@ body {
 			text-align: center;
 			font-weight: 300; 
 		}
-		div.button{
+		div.button1{
 			width: 386px;
 			height: 65px;
 			margin: 0 auto;
 			padding: 25px;
+		}
+		div.holder{
+			padding: 20px;
+			width: 386px;
+			margin: 0 auto;
+		}
+		button {
+		    border : 0px;
+		    -moz-border-radius:7px;
+		    -webkit-border-radius:7px;
+		    border-radius:7px;
+		    padding:0; 
+			margin:0;
 		}
