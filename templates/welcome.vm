@@ -2,43 +2,27 @@
   <head>
     <title>Welcome | AdversaryLab</title>
     <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-    <link href="/static/style.css" rel="stylesheet" type="text/css"/>
-        
-        <style type="text/css">
-		<link href='http://fonts.googleapis.com/css?family=Nunito' rel='stylesheet' type='text/css'>
-		
-		body {
-			border: 0;
-			margin: 0;
-			padding: 0;
-			height: 100%;
-			width: 100%;
-			background-color: #7dc5f2;
-		}
-		div.micro {
-			height: 170px;
-			width: 200px;
-			margin: 0 auto;
-		}
-		div.smallText {
-			font-family: 'Nunito', sans-serif;
-			width: 60%;
-			font-size: 14px;
-		}
-		
-		<link href='http://fonts.googleapis.com/css?family=Nunito' rel='stylesheet' type='text/css'>
-		
-		</style>
-		
-		
+    <link href="/static/style.css" rel="stylesheet" type="text/css"/>	
+  <link href='http://fonts.googleapis.com/css?family=Nunito:400,300' rel='stylesheet' type='text/css'>
   </head>
   <body>
-  	<div class="micro"><img src="/static/images/micro.png" alt="Scary horned figure"/></div>
-    <h1>Welcome to AdversaryLab!</h1>
-    
-    <div class="smallText">Welcome to AdversaryLab!</div>
-    <p>
-      <a href="/login">Sign in with your Google Account</a>
-    </p>
+  <div class="container">
+	  <div class="top">
+		  <div class="micro">
+			  <img src="/static/images/micro.png" width="200" height="179"/>
+		  </div>
+	  </div>
+	  	
+	  <div class="bottom">   
+		  <div class="largeText">Welcome to AdversaryLab!</div>
+		  <div class="smallText">Can your protocol bypass current filtering hardware?  Is your traffic being filtered?
+Upload a pCAP to run it against simulated deep packet inspection filtering algorithms and receive an Adversary Labs report.</div>
+	    <p>
+	      <div class="button">
+	      <a href="/login"><img src="/static/images/googleIcon.png"  width="368" height="65"/></a>
+	      </div>
+	    </p>
+	</div>
+  </div>
   </body>
 </html>
