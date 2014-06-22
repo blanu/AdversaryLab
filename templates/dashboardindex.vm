@@ -7,20 +7,22 @@
   <body>
     <button id="addCaptureButton">Add capture file</button>
     <div id="uploader" class="hidden">
-      <form enctype="multipart/form-data" action="$uploadUrl" method="post" > 
-  	    <input type="file" name="pcapFile"/> 
-    		<input type="submit"/> 
-	    </form> 
+      <form enctype="multipart/form-data" action="$uploadUrl" method="post" >
+  	    <input type="file" name="pcapFile"/>
+    		<input type="submit"/>
+	    </form>
     </div>
     <ul id="pcaps">
     #foreach($pcap in $pcaps)
       <li>
         $pcap.filename
-      
+
         #if($pcap.status==0)
           Processing
         #elseif($pcap.status==1)
-          Complete
+          Complete <a href="/report?filekey=$pcap.filekey.key()">View Report</a>
+        #elseif($pcap.status==1)
+          Uploaded
         #else
           Unknown
         #end

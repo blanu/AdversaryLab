@@ -4,6 +4,7 @@ import random
 import base64
 import struct
 import time
+import json
 
 import urllib
 from urllib import urlencode, unquote_plus
@@ -66,6 +67,7 @@ class DashboardIndex(TemplatePage):
   def requireLogin(self):
     return True
 
+# FIXME - Does not require authentication
 class Upload(blobstore_handlers.BlobstoreUploadHandler):
   def post(self):
     user = users.get_current_user()
@@ -75,9 +77,52 @@ class Upload(blobstore_handlers.BlobstoreUploadHandler):
     blob_info = upload_files[0]
     blobkey = blob_info.key()
 
-    pcap=PcapFile(filename=blob_info.filename, uploader=user, filekey=blobkey, status=status.processing)
+    pcap=PcapFile(filename=blob_info.filename, uploader=user, filekey=blobkey, status=status.uploaded)
     pcap.save()
 
     deferred.defer(processPcap, blobkey)
 
     self.redirect('/dashboard')
+
+# FIXME - Does not require authentication
+class Download(blobstore_handlers.BlobstoreDownloadHandler):
+  def get(self):
+    filekey=self.request.get('filekey')
+
+    pcap=PcapFile.all().filter('filekey =', filekey).get()
+    if pcap:
+      self.response.headers['Content-Disposition']=str("attachment; filename=\"%s\"" % (pcap.filename))
+
+      resource = str(urllib.unquote(filekey))
+      blob_info = blobstore.BlobInfo.get(resource)
+      self.send_blob(blob_info)
+
+class Report(TemplatePage):
+  def processContext(self, method, user, req, resp, args, context):
+    filekey=self.request.get('filekey')
+    context['userid']=user.email().lower()
+
+    pcap=PcapFile.all().filter("filekey =", filekey).get()
+    if pcap:
+      context['pcap']=pcap
+    logging.info('pcap: '+str(pcap))
+
+  def requireLogin(self):
+    return True
+
+class UploadReport(JsonPage):
+  def processJson(self, method, user, req, resp, args, obj):
+    filekey=obj['filekey']
+    logging.info('UploadReport: '+str(obj))
+
+    pcap=PcapFile.all().filter("filekey =", filekey).get()
+    pcap.status=status.complete
+    pcap.report=json.dumps(obj)
+    pcap.save()
+
+    print('Uploaded report for '+str(pcap))
+
+    return None
+
+  def requireLogin(self):
+    return True
