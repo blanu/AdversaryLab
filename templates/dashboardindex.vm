@@ -5,6 +5,14 @@
     <link href="/static/style.css" rel="stylesheet" type="text/css"/>
   </head>
   <body>
+  <div class="container">
+	  <div class="top">
+		  <div class="micro">
+			  <img src="/static/images/micro.png" width="200" height="179"/>
+		  </div>
+	  </div>
+	  
+	  <div class="bottom"> 
     <button id="addCaptureButton">Add capture file</button>
     <div id="uploader" class="hidden">
       <form enctype="multipart/form-data" action="$uploadUrl" method="post" >
@@ -29,6 +37,7 @@
       </li>
     #end
     </ul>
+	  </div>
   </body>
 
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
