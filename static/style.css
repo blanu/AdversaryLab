@@ -56,7 +56,7 @@ body {
 		}
 		div.holder{
 			padding: 20px;
-			width: 386px;
+			width: 332px;
 			margin: 0 auto;
 		}
 		button {
@@ -66,4 +66,5 @@ body {
 		    border-radius:7px;
 		    padding:0; 
 			margin:0;
+			outline: none;
 		}
