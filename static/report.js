@@ -1,26 +1,71 @@
+function expand(arr)
+{
+  var results=[["Packet Length", "Count"]];
+  for(var x=0; x<arr.length; x++)
+  {
+    results.push([x, arr[x]]);
+  }
+  
+  return results;
+}
+
+function normalize(arr)
+{
+  var results=[["Packet Length", "Count"]];
+  total=0;
+  for(var x=0; x<arr.length; x++)
+  {
+    total=total+arr[x]
+  }
+  
+  for(var x=0; x<arr.length; x++)
+  {
+    results.push([x, arr[x]/total]);
+  }
+  
+  return results;  
+}
+
+function drawLengthCounts()
+{
+    var data = google.visualization.arrayToDataTable(expand(report['lengths']));
+    
+    var options = {
+      'title':'Count of Packets with a Given Length',
+      'width':400, 'height':300,
+      'orientation': 'horizontal',
+      'legend': {
+        'position': 'none'
+      }
+    };
+
+    var chart = new google.visualization.BarChart(document.getElementById('lengthCount'));
+    chart.draw(data, options);
+}
+
+function drawLengthProbs()
+{
+    var data = google.visualization.arrayToDataTable(normalize(report['lengths']));
+    
+    var options = {
+      'title':'Probability of Packets with a Given Length',
+      'width':400, 'height':300,
+      'orientation': 'horizontal',
+      'legend': {
+        'position': 'none'
+      }
+    };
+
+    var chart = new google.visualization.BarChart(document.getElementById('lengthProbability'));
+    chart.draw(data, options);
+}
+
 $(document).ready(function() {
-  google.load('visualization', '1.0', {'packages':['corechart']});
-
-  google.setOnLoadCallback(drawChart);
-
   function drawChart()
   {
-/*
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'Topping');
-    data.addColumn('number', 'Slices');
-    data.addRows([
-          ['Mushrooms', 3],
-          ['Onions', 1],
-          ['Olives', 1],
-          ['Zucchini', 1],
-          ['Pepperoni', 2]
-    ]);
-        
-    var options = {'title':'How Much Pizza I Ate Last Night', 'width':400, 'height':300};
-
-    var chart = new google.visualization.PieChart(document.getElementById('lengthReport'));
-    chart.draw(data, options);
-*/
+    drawLengthCounts();
+    drawLengthProbs();
   }
+    
+  google.setOnLoadCallback(drawChart);  
 });
