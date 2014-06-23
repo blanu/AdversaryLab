@@ -15,7 +15,7 @@
    <div class="container">
 	  <div class="top2">
 		  <div class="micro">
-			  <img src="/static/images/micro.png" width="200" height="179"/>
+			  <a href="/welcome"><img src="/static/images/micro.png" width="200" height="179"/></a>
 		  </div>
 	  </div>
 	  <div class="bottom2"> 
