@@ -20,6 +20,14 @@
       </p>
     </p>
     <p>
+      <h2>Entropy Report</h2>
+      <p>
+        Stream Entropy: <span id="streamEntropy" class="entropy"></span>
+        <br/>
+        First Packet Entropy: <span id="firstEntropy" class="entropy"></span>
+      </p>
+    </p>
+    <p>
       <a href="/download?filekey=$pcap.filekey.key()">Download Capture File</a>
     </p>
   </body>

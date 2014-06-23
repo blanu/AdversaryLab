@@ -64,8 +64,11 @@ $(document).ready(function() {
   function drawChart()
   {
     drawLengthCounts();
-    drawLengthProbs();
+//    drawLengthProbs();
   }
     
   google.setOnLoadCallback(drawChart);  
+  
+  $('#streamEntropy').text(report.entropy);
+  $('#firstEntropy').text(report['entropy-first']);
 });
