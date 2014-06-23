@@ -22,7 +22,7 @@
 				  <div class="rect">
 					  <div class="choose">
 						  <input type="file" name="pcapFile"/>
-						  <input type="submit"/>
+						  <input type="submit" value="Upload"/>
 					  </div>
                   </div>
              </form>

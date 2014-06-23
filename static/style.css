@@ -88,5 +88,8 @@ body {
 			margin: 0 auto;
 			padding: 10px; 
 		}
-		
+		a:link {text-decoration:none;color:#7dc5f2;}
+		a:visited {text-decoration:none;color:#7dc5f2;}
+		a:hover {text-decoration:none;color:#009dff;}
+		a:active {text-decoration:none;color:#ffffff;}
 	
