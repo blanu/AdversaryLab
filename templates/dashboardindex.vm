@@ -35,11 +35,11 @@
         $pcap.filename
 
         #if($pcap.status==0)
-          Processing
+          Processing...
         #elseif($pcap.status==1)
           Complete <a href="/report?filekey=$pcap.filekey.key()">View Report</a>
-        #elseif($pcap.status==1)
-          Uploaded
+        #elseif($pcap.status==2)
+          Processing
         #else
           Unknown
         #end
