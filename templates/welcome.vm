@@ -15,8 +15,7 @@
 	  	
 	  <div class="bottom">   
 		  <div class="largeText">Welcome to AdversaryLab!</div>
-		  <div class="smallText">Can your protocol bypass current filtering hardware?  Is your traffic being filtered?
-Upload a pCAP to run it against simulated deep packet inspection filtering algorithms and receive an Adversary Labs report.</div>
+		  <div class="smallText">AdversaryLab is a cloud service that provides simulated Deep Packet Inspection filtering algorithms for the protocol obfuscation community. Upload network traffic samples and receive a report of performance against a variety of adversaries. Develop new obfuscating protocols in the lab before you test them in the field.</div>
 	    <p>
 	      <div class="button1">
 	      <a href="/login"><img src="/static/images/googleIcon.png"  width="368" height="65"/></a>
