@@ -69,10 +69,12 @@ body {
 		}
 		#pcaps{
 			font-family: 'Nunito', sans-serif;
-			width: 70%;
+			width: 50%;
 			font-size: 16px;
 			color: #ffffff;
 			font-weight: 300; 
+			margin: 0 auto;
+			padding: 10px;
 		}
 		div.rect{
 			width: 333px;
