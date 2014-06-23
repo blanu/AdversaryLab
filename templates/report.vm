@@ -9,27 +9,45 @@
     
     <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
     <link href="/static/style.css" rel="stylesheet" type="text/css"/>
+    <link href='http://fonts.googleapis.com/css?family=Nunito:400,300' rel='stylesheet' type='text/css'>
   </head>
   <body>
+   <div class="container">
+	  <div class="top2">
+		  <div class="micro">
+			  <img src="/static/images/micro.png" width="200" height="179"/>
+		  </div>
+	  </div>
+	  <div class="bottom2"> 
+	  
     <h1>Report on $pcap.filename</h1>
     <p>
       <h2>Length Report</h2>
+      <div class="graph">      
       <p>
-        <div id="lengthCount"></div>
-        <div id="lengthProbability"></div>
+        <div id="lengthCount" style="padding: 4px;"></div>
       </p>
+      </div>
     </p>
     <p>
       <h2>Entropy Report</h2>
+      <div class="smallText2">
       <p>
         Stream Entropy: <span id="streamEntropy" class="entropy"></span>
         <br/>
         First Packet Entropy: <span id="firstEntropy" class="entropy"></span>
       </p>
+      </div>
     </p>
-    <p>
-      <a href="/download?filekey=$pcap.filekey.key()">Download Capture File</a>
-    </p>
+    
+      <div class="pcapButton">
+      <p>
+      <a href="/download?filekey=$pcap.filekey.key()"><img src="/static/images/pcatButton.png" width="332" height="65"/></a>
+      </p>
+      </div>
+    
+	  </div>
+   </div>
   </body>
 
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>

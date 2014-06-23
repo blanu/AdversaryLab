@@ -16,14 +16,24 @@ body {
 			width: 100%;
 			background-color: #7dc5f2;
 		}
+		div.top2 {
+			height: 246px;
+			width: 100%;
+			background-color: #7dc5f2;
+		}
 		div.micro{
 			margin: 0 auto;
-			padding: 40px;
+			padding-top: 40px;
 			width: 200px;
 			height: 179px;
 		}
 		div.bottom{
 			height: 100%;
+			width: 100%;
+			background-color: #363b3f;
+		}
+		div.bottom2{
+			height: 750px;
 			width: 100%;
 			background-color: #363b3f;
 		}
@@ -37,13 +47,40 @@ body {
 			padding: 25px;
 			font-weight: 400; 
 		}
+		h2{
+			font-family: 'Nunito', sans-serif;
+			font-size: 25px;
+			color: #ebebeb;
+			text-align: center;
+			padding: 10px;
+			font-weight: 300; 
+		}
+		
+		h1{
+			font-family: 'Nunito', sans-serif;
+			width: 100%;
+			font-size: 32px;
+			color: #ffffff;
+			padding-top: 30px;
+			font-weight: 400; 
+			text-align: center;
+		}
 		
 		div.smallText{ 
 			font-family: 'Nunito', sans-serif;
 			width: 50%;
-			height: 60px;
+			height: 106px;
 			font-size: 16px;
 			color: #ffffff;
+			margin: 0 auto;
+			text-align: center;
+			font-weight: 300; 
+		}
+		div.smallText2{ 
+			font-family: 'Nunito', sans-serif;
+			width: 50%;
+			font-size: 16px;
+			color: #e1e1e1;
 			margin: 0 auto;
 			text-align: center;
 			font-weight: 300; 
@@ -87,6 +124,18 @@ body {
 			height: 23px;
 			margin: 0 auto;
 			padding: 10px; 
+		}
+		div.graph{
+			width: 405px;
+			height: 306px;
+			background-color: #ffffff; 
+			border-radius: 2px;
+			margin: 0 auto;
+		}
+		div.pcapButton{
+			width: 332px; 
+			height:65px; 
+			margin: 0 auto;
 		}
 		a:link {text-decoration:none;color:#7dc5f2;}
 		a:visited {text-decoration:none;color:#7dc5f2;}
