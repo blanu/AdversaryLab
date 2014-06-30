@@ -3,34 +3,56 @@
     <title>Dashboard | AdversaryLab</title>
     <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
     <link href="/static/style.css" rel="stylesheet" type="text/css"/>
+    <link href='http://fonts.googleapis.com/css?family=Nunito:400,300' rel='stylesheet' type='text/css'>
   </head>
   <body>
-    <button id="addCaptureButton">Add capture file</button>
-    <div id="uploader" class="hidden">
-      <form enctype="multipart/form-data" action="$uploadUrl" method="post" > 
-  	    <input type="file" name="pcapFile"/> 
-    		<input type="submit"/> 
-	    </form> 
+  <div class="container">
+	  <div class="top">
+		  <div class="micro">
+			  <a href="/welcome"><img src="/static/images/micro.png" width="200" height="179"/></a>
+		  </div>
+	  </div>
+  <div class="bottom"> 
+	  <div style="height: 60px;">
+	  </div>
+	  <div class="smallText">Select a pcap file to run it against our simulated deep packet inspection filtering algorithms</div>
+	  <div class="holder">
+		  <div id="uploader">
+			  <form enctype="multipart/form-data" action="$uploadUrl" method="post" >
+				  <div class="rect">
+					  <div class="choose">
+						  <input id="pcapUpload" type="file" name="pcapFile"/>
+						  <input type="submit" value="Upload"/>
+					  </div>
+          </div>
+        </form>
+      </div>
     </div>
+    
     <ul id="pcaps">
     #foreach($pcap in $pcaps)
       <li>
         $pcap.filename
-      
+
         #if($pcap.status==0)
-          Processing
+          Processing...
         #elseif($pcap.status==1)
-          Complete
+          Complete <a href="/report?filekey=$pcap.filekey.key()">View Report</a>
+        #elseif($pcap.status==2)
+          Processing
         #else
           Unknown
         #end
       </li>
     #end
     </ul>
+	  
+	  </div>
+	  
   </body>
 
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>  
   <script type="text/javascript" src="/static/lib/debug.js"></script>
   <script type="text/javascript">
     userid="$userid";

@@ -1,3 +1,2 @@
-$("#addCaptureButton").click(function() {
-  $("#uploader").show();
+$(document).ready(function () {
 });

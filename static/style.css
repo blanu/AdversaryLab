@@ -2,3 +2,143 @@
 {
   display: none;
 }
+body {
+			padding:0; 
+			margin:0; 
+		}
+		div.container{
+			height: 100%;
+			width: 100%;
+			background-color: #7dc5f2;
+		}
+		div.top {
+			height: 280px;
+			width: 100%;
+			background-color: #7dc5f2;
+		}
+		div.top2 {
+			height: 246px;
+			width: 100%;
+			background-color: #7dc5f2;
+		}
+		div.micro{
+			margin: 0 auto;
+			padding-top: 40px;
+			width: 200px;
+			height: 179px;
+		}
+		div.bottom{
+			height: 100%;
+			width: 100%;
+			background-color: #363b3f;
+		}
+		div.bottom2{
+			height: 750px;
+			width: 100%;
+			background-color: #363b3f;
+		}
+		div.largeText{
+			font-family: 'Nunito', sans-serif;
+			width: 356px;
+			height: 30px;
+			font-size: 28px;
+			color: #ffffff;
+			margin: 0 auto;
+			padding: 25px;
+			font-weight: 400; 
+		}
+		h2{
+			font-family: 'Nunito', sans-serif;
+			font-size: 25px;
+			color: #ebebeb;
+			text-align: center;
+			padding: 10px;
+			font-weight: 300; 
+		}
+		
+		h1{
+			font-family: 'Nunito', sans-serif;
+			width: 100%;
+			font-size: 32px;
+			color: #ffffff;
+			padding-top: 30px;
+			font-weight: 400; 
+			text-align: center;
+		}
+		
+		div.smallText{ 
+			font-family: 'Nunito', sans-serif;
+			width: 50%;
+			height: 106px;
+			font-size: 16px;
+			color: #ffffff;
+			margin: 0 auto;
+			text-align: center;
+			font-weight: 300; 
+		}
+		div.smallText2{ 
+			font-family: 'Nunito', sans-serif;
+			width: 50%;
+			font-size: 16px;
+			color: #e1e1e1;
+			margin: 0 auto;
+			text-align: center;
+			font-weight: 300; 
+		}
+		div.button1{
+			width: 386px;
+			height: 65px;
+			margin: 0 auto;
+			padding: 25px;
+		}
+		div.holder{
+			width: 332px;
+			margin: 0 auto;
+		}
+		button {
+		    border : 0px;
+		    -moz-border-radius:7px;
+		    -webkit-border-radius:7px;
+		    border-radius:7px;
+		    padding:0; 
+			margin:0;
+			outline: none;
+		}
+		#pcaps{
+			font-family: 'Nunito', sans-serif;
+			width: 50%;
+			font-size: 16px;
+			color: #ffffff;
+			font-weight: 300; 
+			margin: 0 auto;
+			padding: 10px;
+		}
+		div.rect{
+			width: 333px;
+			height: 45px;
+			background-color: #f7f7f7; 
+			border-radius: 2px;
+		}
+		div.choose{
+			width: 303px;
+			height: 23px;
+			margin: 0 auto;
+			padding: 10px; 
+		}
+		div.graph{
+			width: 405px;
+			height: 306px;
+			background-color: #ffffff; 
+			border-radius: 2px;
+			margin: 0 auto;
+		}
+		div.pcapButton{
+			width: 332px; 
+			height:65px; 
+			margin: 0 auto;
+		}
+		a:link {text-decoration:none;color:#7dc5f2;}
+		a:visited {text-decoration:none;color:#7dc5f2;}
+		a:hover {text-decoration:none;color:#009dff;}
+		a:active {text-decoration:none;color:#ffffff;}
+	

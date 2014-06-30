@@ -15,7 +15,10 @@ app = webapp.WSGIApplication([
   ('/welcome', Welcome),
   ('/login', Login),
   ('/dashboard', DashboardIndex),
-  ('/upload', Upload)
+  ('/upload', Upload),
+  ('/download', Download),
+  ('/report', Report),
+  ('/uploadReport', UploadReport)
 ], debug=True)
 
 def main():

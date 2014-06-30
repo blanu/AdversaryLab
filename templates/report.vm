@@ -1,0 +1,61 @@
+<html>
+  <head>
+    <title>Report on $pcap.filename | AdversaryLab</title>
+    
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1.0', {'packages':['corechart']});
+    </script>    
+    
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/style.css" rel="stylesheet" type="text/css"/>
+    <link href='http://fonts.googleapis.com/css?family=Nunito:400,300' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+   <div class="container">
+	  <div class="top2">
+		  <div class="micro">
+			  <a href="/welcome"><img src="/static/images/micro.png" width="200" height="179"/></a>
+		  </div>
+	  </div>
+	  <div class="bottom2"> 
+	  
+    <h1>Report on $pcap.filename</h1>
+    <p>
+      <h2>Length Report</h2>
+      <div class="graph">      
+      <p>
+        <div id="lengthCount" style="padding: 4px;"></div>
+      </p>
+      </div>
+    </p>
+    <p>
+      <h2>Entropy Report</h2>
+      <div class="smallText2">
+      <p>
+        Stream Entropy: <span id="streamEntropy" class="entropy"></span>
+        <br/>
+        First Packet Entropy: <span id="firstEntropy" class="entropy"></span>
+      </p>
+      </div>
+    </p>
+    
+      <div class="pcapButton">
+      <p>
+      <a href="/download?filekey=$pcap.filekey.key()"><img src="/static/images/pcatButton.png" width="332" height="65"/></a>
+      </p>
+      </div>
+    
+	  </div>
+   </div>
+  </body>
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="/static/lib/debug.js"></script>
+  <script type="text/javascript">  
+    userid="$userid";
+    report=$pcap.report
+  </script>
+  <script type="text/javascript" src="/static/report.js"></script>
+</html>

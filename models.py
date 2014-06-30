@@ -8,3 +8,5 @@ class PcapFile(db.Model):
   filename=db.StringProperty(required=True)
   filekey=blobstore.BlobReferenceProperty(required=True)
   status=db.IntegerProperty(required=True)
+  report=db.TextProperty(required=False)
+    
