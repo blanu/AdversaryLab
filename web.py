@@ -24,6 +24,9 @@ app = webapp.WSGIApplication([
   ('/protocolReport', ProtocolReport),
   ('/dataset', DatasetIndex),
   ('/datasetReport', DatasetReport),
+  ('/manageProtocols', ManageProtocols),
+  ('/manageDatasets', ManageDatasets),
+  ('/organize', Organize),
 
   ('/api/protocol', ProtocolService),
   ('/api/dataset', DatasetService),

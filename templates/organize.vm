@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <title>Dashboard | AdversaryLab</title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <link href="/css/polymer.css" rel="stylesheet" type="text/css"/>
+    <script src="/js/lib/polymer/components/platform/platform.js"></script>
+    <link rel="import" href="/js/lib/polymer/components/font-roboto/roboto.html">
+  </head>
+  <body fullbleed unresolved touch-action="auto">
+    <core-scaffold>
+      <core-header-panel navigation flex mode="seamed">        
+        <core-toolbar>Menu</core-toolbar>
+        <core-menu theme="core-light-theme" selected="3">
+  	      <core-item label="Upload Pcaps"><a href="/dashboard"></a></core-item>
+  	      <core-item label="Manage Datasets"><a href="/manageDatasets"></a></core-item>
+  	      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
+  	      <core-item label="Organize Pcaps"></core-item>
+        </core-menu>
+      </core-header-panel>  
+  
+      <div tool>Upload Pcaps : Adversary Lab</div>
+	    <div id="content">
+        <table id="classifiedPcaps">
+        #foreach($pcap in $pcaps)
+          <tr>
+            <td>
+              $pcap.filename
+            </td>
+            <td>
+              <select class="pcapDataset" filekey="$pcap.filekey.key()">
+                <option value=""></option>
+              #foreach($dataset in $datasets)
+                #if($pcap.dataset && $dataset.name==$pcap.dataset.name)
+                <option value="$dataset.name" selected="true">$dataset.name</option>
+                #else
+                <option value="$dataset.name">$dataset.name</option>
+                #end
+              #end
+              </select>
+            </td>
+            <td>
+              <select class="pcapProtocol" filekey="$pcap.filekey.key()">
+                <option value=""></option>
+              #foreach($prot in $prots)
+                #if($pcap.protocol && $prot.name==$pcap.protocol.name)
+                <option value="$prot.name" selected="true">$prot.name</option>
+                #else
+                <option value="$prot.name">$prot.name</option>
+                #end
+              #end
+              </select>
+            </td>
+          </tr>
+          #end
+        </table>
+	    </div>
+    </core-scaffold>
+  </body>
+
+  <link rel="import" href="/js/lib/polymer/components/core-scaffold/core-scaffold.html">
+  <link rel="import" href="/js/lib/polymer/components/core-header-panel/core-header-panel.html">
+  <link rel="import" href="/js/lib/polymer/components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="/js/lib/polymer/components/core-menu/core-menu.html">
+  <link rel="import" href="/js/lib/polymer/components/core-item/core-item.html">
+  <link rel="import" href="/js/lib/polymer/components/core-selector/core-selector.html">
+  <link rel="import" href="/js/lib/polymer/components/core-selection/core-selection.html">
+  <link rel="import" href="/js/lib/polymer/components/core-icons/core-icons.html">
+  <link rel="import" href="/js/lib/polymer/components/paper-tabs/paper-tabs.html">
+  <link rel="import" href="/js/lib/polymer/components/paper-input/paper-input.html">
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="/js/lib/knockout.js"></script>
+  <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>  
+  <script type="text/javascript" src="/js/lib/debug.js"></script>
+  <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
+  <script type="text/javascript">
+    userid="$userid";
+  </script>
+  <script type="text/javascript" src="/js/index.js"></script>
+</html>

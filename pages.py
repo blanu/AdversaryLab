@@ -26,7 +26,7 @@ import status
 from generic import TemplatePage, GenericPage, FilePage
 from models import *
 from util import *
-from process import *
+#from process import *
 
 class Index(TemplatePage):
   def processContext(self, method, user, req, resp, args, context):
@@ -75,6 +75,69 @@ class DashboardIndex(TemplatePage):
   def requireLogin(self):
     return True
 
+class ManageDatasets(TemplatePage):
+  def processContext(self, method, user, req, resp, args, context):
+    logging.debug("dashboard index")
+    context['userid']=user.email().lower()
+    context['uploadUrl']=blobstore.create_upload_url('/upload')
+
+    pcaps=PcapFile.all().filter("uploader =", user).order('status').fetch(100)
+    context['pcaps']=pcaps
+    logging.info('pcaps: '+str(pcaps))
+
+    prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+    context['prots']=prots
+    logging.info('prots: '+str(prots))
+
+    datasets=Dataset.all().filter("creator =", user).order('name').fetch(100)
+    context['datasets']=datasets
+    logging.info('datasets: '+str(datasets))
+
+  def requireLogin(self):
+    return True
+
+class ManageProtocols(TemplatePage):
+  def processContext(self, method, user, req, resp, args, context):
+    logging.debug("dashboard index")
+    context['userid']=user.email().lower()
+    context['uploadUrl']=blobstore.create_upload_url('/upload')
+
+    pcaps=PcapFile.all().filter("uploader =", user).order('status').fetch(100)
+    context['pcaps']=pcaps
+    logging.info('pcaps: '+str(pcaps))
+
+    prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+    context['prots']=prots
+    logging.info('prots: '+str(prots))
+
+    datasets=Dataset.all().filter("creator =", user).order('name').fetch(100)
+    context['datasets']=datasets
+    logging.info('datasets: '+str(datasets))
+
+  def requireLogin(self):
+    return True
+
+class Organize(TemplatePage):
+  def processContext(self, method, user, req, resp, args, context):
+    logging.debug("dashboard index")
+    context['userid']=user.email().lower()
+    context['uploadUrl']=blobstore.create_upload_url('/upload')
+
+    pcaps=PcapFile.all().filter("uploader =", user).order('status').fetch(100)
+    context['pcaps']=pcaps
+    logging.info('pcaps: '+str(pcaps))
+
+    prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+    context['prots']=prots
+    logging.info('prots: '+str(prots))
+
+    datasets=Dataset.all().filter("creator =", user).order('name').fetch(100)
+    context['datasets']=datasets
+    logging.info('datasets: '+str(datasets))
+
+  def requireLogin(self):
+    return True
+
 # FIXME - Does not require authentication
 class Upload(blobstore_handlers.BlobstoreUploadHandler):
   def post(self):
@@ -100,7 +163,7 @@ class Upload(blobstore_handlers.BlobstoreUploadHandler):
     pcap=PcapFile(filename=blob_info.filename, uploader=user, filekey=blobkey, status=status.uploaded, port=port, dataset=dataset, protocol=protocol)
     pcap.save()
 
-    deferred.defer(processPcap, blobkey)
+#    deferred.defer(processPcap, blobkey)
 
     self.redirect('/dashboard')
 
