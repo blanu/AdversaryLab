@@ -60,9 +60,17 @@ class DashboardIndex(TemplatePage):
     context['userid']=user.email().lower()
     context['uploadUrl']=blobstore.create_upload_url('/upload')
 
-    pcaps=PcapFile.all().filter("uploader =", user).order('status').fetch(10)
+    pcaps=PcapFile.all().filter("uploader =", user).order('status').fetch(100)
     context['pcaps']=pcaps
     logging.info('pcaps: '+str(pcaps))
+
+    prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+    context['prots']=prots
+    logging.info('prots: '+str(prots))
+
+    datasets=Dataset.all().filter("creator =", user).order('name').fetch(100)
+    context['datasets']=datasets
+    logging.info('datasets: '+str(datasets))
 
   def requireLogin(self):
     return True
@@ -72,17 +80,43 @@ class Upload(blobstore_handlers.BlobstoreUploadHandler):
   def post(self):
     user = users.get_current_user()
 
+    port=self.validatePort(self.request.get('port'))
+    if not port:
+      logging.error("Invalid port: "+self.request.get('port'))
+      self.redirect('/dashboard')
+      return
+
+    datasetname=self.request.get('pcapUploadDataset')
+    dataset=Dataset.all().filter('dataset =', datasetname).get()
+
+    protocolname=self.request.get('pcapUploadProtocol')
+    protocol=Dataset.all().filter('protocol =', protocolname).get()
+
     upload_files = self.get_uploads('pcapFile')  # 'file' is file upload field in the form
     logging.info('upload_files: '+str(upload_files))
     blob_info = upload_files[0]
     blobkey = blob_info.key()
 
-    pcap=PcapFile(filename=blob_info.filename, uploader=user, filekey=blobkey, status=status.uploaded)
+    pcap=PcapFile(filename=blob_info.filename, uploader=user, filekey=blobkey, status=status.uploaded, port=port, dataset=dataset, protocol=protocol)
     pcap.save()
 
     deferred.defer(processPcap, blobkey)
 
     self.redirect('/dashboard')
+
+  def validatePort(self, portString):
+    if not portString:
+      return None
+
+    try:
+      port=int(portString)
+    except:
+      return None
+
+    if port<1 or port>65535:
+      return None
+
+    return port
 
 # FIXME - Does not require authentication
 class Download(blobstore_handlers.BlobstoreDownloadHandler):
@@ -105,7 +139,178 @@ class Report(TemplatePage):
     pcap=PcapFile.all().filter("filekey =", filekey).get()
     if pcap:
       context['pcap']=pcap
+
+      if pcap.report and pcap.report.incoming and pcap.report.outgoing:
+        context['report']=dumps({
+          'incoming': {
+            'lengths': map(int, pcap.report.incoming.lengths),
+            'entropy': pcap.report.incoming.entropies
+          },
+          'outgoing': {
+            'lengths': map(int, pcap.report.outgoing.lengths),
+            'entropy': pcap.report.outgoing.entropies
+          }
+        })
     logging.info('pcap: '+str(pcap))
+
+  def requireLogin(self):
+    return True
+
+class ProtocolReport(TemplatePage):
+  def processContext(self, method, user, req, resp, args, context):
+    name=self.request.get('protocol')
+    context['userid']=user.email().lower()
+
+    context['protocol']=None
+    context['report']=None
+
+    protocol=Protocol.all().filter('creator =', user).filter('name =', name).get()
+    if protocol:
+      context['protocol']=protocol
+      logging.info('protocol: '+str(protocol))
+      pcaps=PcapFile.all().filter('protocol =', protocol).fetch(100)
+      if pcaps:
+        context['report']=dumps({
+          'incoming': {
+            'lengths': self.compileIncomingLengths(pcaps),
+            'entropy': self.compileIncomingEntropy(pcaps)
+          },
+          'outgoing': {
+            'lengths': self.compileOutgoingLengths(pcaps),
+            'entropy': self.compileOutgoingEntropy(pcaps)
+          }
+        })
+
+  def compileIncomingLengths(self, pcaps):
+    lengths=[0]*1500
+    for pcap in pcaps:
+      if pcap.report and pcap.report.incoming:
+        for x in range(len(pcap.report.incoming.lengths)):
+          lengths[x]=lengths[x]+pcap.report.incoming.lengths[x]
+    return lengths
+
+  def compileOutgoingLengths(self, pcaps):
+    lengths=[0]*1500
+    for pcap in pcaps:
+      if pcap.report and pcap.report.outgoing:
+        for x in range(len(pcap.report.outgoing.lengths)):
+          lengths[x]=lengths[x]+pcap.report.outgoing.lengths[x]
+    return lengths
+
+  def compileIncomingEntropy(self, pcaps):
+    entropies=[]
+    for pcap in pcaps:
+      if pcap.report and pcap.report.incoming:
+        entropies=entropies+pcap.report.incoming.entropies
+    entropies=filter(lambda x: x!=0, entropies)
+    entropies.sort()
+    return entropies
+
+  def compileOutgoingEntropy(self, pcaps):
+    entropies=[]
+    for pcap in pcaps:
+      if pcap.report and pcap.report.outgoing:
+        entropies=entropies+pcap.report.incoming.entropies
+    entropies=filter(lambda x: x!=0, entropies)
+    entropies.sort()
+    return entropies
+
+  def requireLogin(self):
+    return True
+
+class DatasetIndex(TemplatePage):
+  def processContext(self, method, user, req, resp, args, context):
+    logging.debug("dataset index")
+    name=self.request.get('dataset')
+    context['userid']=user.email().lower()
+    context['dataset']=name
+
+    context['pcaps']=None
+    context['prots']=None
+
+    dataset=Dataset.all().filter('creator =', user).filter('name =', name).get()
+    if dataset:
+      context['dataset']=dataset
+      logging.info('dataset: '+str(dataset))
+
+      pcaps=PcapFile.all().filter("uploader =", user).filter('dataset =', dataset).order('filename').fetch(100)
+      context['pcaps']=pcaps
+      logging.info('pcaps: '+str(pcaps))
+
+      prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+      context['prots']=prots
+      logging.info('prots: '+str(prots))
+
+  def requireLogin(self):
+    return True
+
+class DatasetReport(TemplatePage):
+  def processContext(self, method, user, req, resp, args, context):
+    protocolName=self.request.get('protocol')
+    datasetName=self.request.get('dataset')
+    context['userid']=user.email().lower()
+
+    context['protocol']=None
+    context['dataset']=None
+    context['report']=None
+
+    protocol=Protocol.all().filter('creator =', user).filter('name =', protocolName).get()
+    if protocol:
+      context['protocol']=protocol
+      logging.info('protocol: '+str(protocol))
+
+      dataset=Dataset.all().filter('creator =', user).filter('name =', datasetName).get()
+      if dataset:
+        context['dataset']=dataset
+        logging.info('dataset: '+str(dataset))
+
+        pcaps=PcapFile.all().filter("uploader =", user).filter('protocol =', protocol).filter('dataset =', dataset).fetch(100)
+        if pcaps:
+          logging.info("Found %d pcaps" %(len(pcaps)))
+          context['report']=dumps({
+            'incoming': {
+              'lengths': self.compileIncomingLengths(pcaps),
+              'entropy': self.compileIncomingEntropy(pcaps)
+            },
+            'outgoing': {
+              'lengths': self.compileOutgoingLengths(pcaps),
+              'entropy': self.compileOutgoingEntropy(pcaps)
+            }
+          })
+
+  def compileIncomingLengths(self, pcaps):
+    lengths=[0]*1500
+    for pcap in pcaps:
+      if pcap.report and pcap.report.incoming:
+        for x in range(len(pcap.report.incoming.lengths)):
+          lengths[x]=lengths[x]+pcap.report.incoming.lengths[x]
+    return lengths
+
+  def compileOutgoingLengths(self, pcaps):
+    lengths=[0]*1500
+    for pcap in pcaps:
+      if pcap.report and pcap.report.outgoing:
+        for x in range(len(pcap.report.outgoing.lengths)):
+          lengths[x]=lengths[x]+pcap.report.outgoing.lengths[x]
+    return lengths
+
+  def compileIncomingEntropy(self, pcaps):
+    entropies=[]
+    for pcap in pcaps:
+      if pcap.report and pcap.report.incoming:
+        entropies=entropies+pcap.report.incoming.entropies
+    entropies=filter(lambda x: x!=0, entropies)
+    entropies.sort()
+    return entropies
+
+  def compileOutgoingEntropy(self, pcaps):
+    entropies=[]
+    for pcap in pcaps:
+      if pcap.report and pcap.report.outgoing:
+        entropies=entropies+pcap.report.incoming.entropies
+    entropies=filter(lambda x: x!=0, entropies)
+    entropies.sort()
+    return entropies
 
   def requireLogin(self):
     return True
@@ -126,3 +331,9 @@ class UploadReport(JsonPage):
 
   def requireLogin(self):
     return True
+
+class ForceProcess(JsonPage):
+  def processJson(self, method, user, req, resp, args, obj):
+    filekey=obj['filekey']
+
+    deferred.defer(processPcap, filekey)

@@ -12,48 +12,146 @@
 			  <a href="/welcome"><img src="/static/images/micro.png" width="200" height="179"/></a>
 		  </div>
 	  </div>
-  <div class="bottom"> 
+  <div class="bottom">
 	  <div style="height: 60px;">
 	  </div>
-	  <div class="smallText">Select a pcap file to run it against our simulated deep packet inspection filtering algorithms</div>
-	  <div class="holder">
-		  <div id="uploader">
-			  <form enctype="multipart/form-data" action="$uploadUrl" method="post" >
-				  <div class="rect">
-					  <div class="choose">
-						  <input id="pcapUpload" type="file" name="pcapFile"/>
-						  <input type="submit" value="Upload"/>
-					  </div>
+	  <div id="tabs">
+	    <ul>
+	      <li>
+  	      <a href="#uploadTab">Upload Pcaps</a>
+	      </li>
+	      <li>
+  	      <a href="#datasetsTab">Manage Datasets</a>
+	      </li>
+	      <li>
+  	      <a href="#protocolsTab">Manage Protocols</a>
+	      </li>
+	      <li>
+  	      <a href="#organizeTab">Organize Pcaps</a>
+	      </li>
+	    </ul>
+	    <div id="uploadTab">
+    	  <div class="smallText">Select a pcap file to run it against our simulated deep packet inspection filtering algorithms.</div>
+    	  <div class="smallText">Specify the port that your traffic uses. The captured traffic will automatically be split into separate streams and extraneous traffic not using the specified port will be ignored. Traffic to the port will be marked as outgoing while traffic from that port will be marked as incoming.</div>
+    	  <div class="holder">
+    		  <div id="uploader">
+    			  <form enctype="multipart/form-data" action="$uploadUrl" method="post" >
+    				  <div class="rect">
+    					  <div class="choose">
+    						  <input id="pcapUpload" type="file" name="pcapFile"/>
+    						  Port <input id="port" type="text" name="port"/>
+    						  <input type="submit" value="Upload"/>
+                  <select class="pcapUploadDataset" name="pcapUploadDataset">
+                    <option value=""></option>
+                    #foreach($dataset in $datasets)
+                      <option value="$dataset.name">$dataset.name</option>
+                    #end
+                  </select>						  
+                  <select class="pcapUploadProtocol" name="pcapUploadProtocol">
+                    <option value=""></option>
+                    #foreach($prot in $prots)
+                      <option value="$prot.name">$prot.name</option>
+                    #end
+                  </select>						  
+    					  </div>
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
     
-    <ul id="pcaps">
-    #foreach($pcap in $pcaps)
-      <li>
-        $pcap.filename
-
-        #if($pcap.status==0)
-          Processing...
-        #elseif($pcap.status==1)
-          Complete <a href="/report?filekey=$pcap.filekey.key()">View Report</a>
-        #elseif($pcap.status==2)
-          Processing
-        #else
-          Unknown
+        <ul id="pcaps">
+        #foreach($pcap in $pcaps)
+          <li>
+            $pcap.filename
+    
+            #if($pcap.status==0)
+              Processing...
+            #elseif($pcap.status==1)
+              Complete <a href="/report?filekey=$pcap.filekey.key()">View Report</a>
+            #elseif($pcap.status==2)
+              Processing
+            #else
+              Unknown
+            #end
+    
+            #if($admin)
+              <button class="runButton" filekey="$pcap.filekey.key()">&nbsp;Run&nbsp;</button>
+            #end
+          </li>
         #end
-      </li>
-    #end
-    </ul>
-	  
+        </ul>
+	    </div>
+  
+      <div id="datasetsTab">
+        <ul id="datasets">
+          #foreach($dataset in $datasets)
+          <li>
+            $dataset.name <a href="/dataset?dataset=$dataset.name">View Report</a>
+          </li>
+          #end
+        </ul>
+  
+        <button id="addDataset">Add dataset</button>
+      </div>    
+      
+      <div id="protocolsTab">
+        <ul id="prots">
+          #foreach($prot in $prots)
+          <li>
+            $prot.name <a href="/protocolReport?protocol=$prot.name">View Report</a>
+          </li>
+          #end
+        </ul>
+  
+        <button id="addProtocol">Add protocol</button>
+      </div>
+  
+      <div id="organizeTab">
+        <table id="classifiedPcaps">
+        #foreach($pcap in $pcaps)
+          #if($pcap.status==1)
+          <tr>
+            <td>
+              $pcap.filename
+            </td>
+            <td>
+              <select class="pcapDataset" filekey="$pcap.filekey.key()">
+                <option value=""></option>
+              #foreach($dataset in $datasets)
+                #if($pcap.dataset && $dataset.name==$pcap.dataset.name)
+                <option value="$dataset.name" selected="true">$dataset.name</option>
+                #else
+                <option value="$dataset.name">$dataset.name</option>
+                #end
+              #end
+              </select>
+            </td>
+            <td>
+              <select class="pcapProtocol" filekey="$pcap.filekey.key()">
+                <option value=""></option>
+              #foreach($prot in $prots)
+                #if($pcap.protocol && $prot.name==$pcap.protocol.name)
+                <option value="$prot.name" selected="true">$prot.name</option>
+                #else
+                <option value="$prot.name">$prot.name</option>
+                #end
+              #end
+              </select>
+            </td>
+          </tr>
+          #end
+        #end
+        </table>
+      </div>
 	  </div>
-	  
+  </div>
+
   </body>
 
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>  
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
   <script type="text/javascript" src="/static/lib/debug.js"></script>
+  <script type="text/javascript" src="/static/lib/jsonrpc.js"></script>
   <script type="text/javascript">
     userid="$userid";
   </script>

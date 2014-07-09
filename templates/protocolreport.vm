@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Report on $pcap.filename | AdversaryLab</title>
+    <title>Report on $protocol.name | AdversaryLab</title>
     
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
@@ -20,7 +20,7 @@
 	  </div>
 	  <div class="bottom2"> 
 	  
-    <h1>Report on $pcap.filename</h1>
+    <h1>Report on $protocol.name</h1>
     <p>
       <h2>Length Report</h2>
       <div class="graph">      
@@ -31,20 +31,14 @@
       </div>
     </p>
     <p>
-      <h2>Entropy Report</h2>
-      <div class="smallText2">
+      <h2>Stream Entropy Report</h2>
+      <div class="graph">      
       <p>
         <div id="incomingEntropy" style="padding: 4px;"></div>
         <div id="outgoingEntropy" style="padding: 4px;"></div>
       </p>
       </div>
     </p>
-    
-      <div class="pcapButton">
-      <p>
-      <a href="/download?filekey=$pcap.filekey.key()"><img src="/static/images/pcatButton.png" width="332" height="65"/></a>
-      </p>
-      </div>
     
 	  </div>
    </div>
@@ -55,7 +49,11 @@
   <script type="text/javascript" src="/static/lib/debug.js"></script>
   <script type="text/javascript">  
     userid="$userid";
-    report=$report
+    #if($report)
+    report=$report;
+    #else
+    report=null;
+    #end
   </script>
   <script type="text/javascript" src="/static/report.js"></script>
 </html>

@@ -8,6 +8,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 
 from pages import *
+from api import *
 
 app = webapp.WSGIApplication([
   ('/', Index),
@@ -18,7 +19,15 @@ app = webapp.WSGIApplication([
   ('/upload', Upload),
   ('/download', Download),
   ('/report', Report),
-  ('/uploadReport', UploadReport)
+  ('/uploadReport', UploadReport),
+  ('/process', ForceProcess),
+  ('/protocolReport', ProtocolReport),
+  ('/dataset', DatasetIndex),
+  ('/datasetReport', DatasetReport),
+
+  ('/api/protocol', ProtocolService),
+  ('/api/dataset', DatasetService),
+  ('/api/pcap', PcapService)
 ], debug=True)
 
 def main():

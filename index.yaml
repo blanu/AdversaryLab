@@ -14,8 +14,28 @@ indexes:
   properties:
   - name: uploader
   - name: status
+    direction: asc
 
 - kind: PcapFile
   properties:
-  - name: user
-  - name: status
+  - name: uploader
+  - name: dataset
+  - name: filename
+    direction: asc
+
+- kind: PcapFile
+  properties:
+  - name: uploader
+  - name: protocol
+  - name: dataset
+    direction: asc
+
+- kind: Dataset
+  properties:
+  - name: creator
+  - name: name
+
+- kind: Protocol
+  properties:
+  - name: creator
+  - name: name

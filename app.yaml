@@ -1,8 +1,17 @@
 application: adversary-lab
-version: 1
+version: 2
 runtime: python27
 api_version: 1
-threadsafe: yes
+threadsafe: true
+vm: true
+module: default
+
+manual_scaling:
+  instances: 1
+
+vm_settings:
+  machine_type: n1-standard-1
+  apt_get_install: python-scapy
 
 handlers:
 - url: /favicon\.ico

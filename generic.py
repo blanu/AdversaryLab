@@ -11,7 +11,7 @@ class GenericPage(webapp.RequestHandler):
   def options(self, *args):
     self.response.headers['Access-Control-Allow-Origin']='*'
     self.response.headers['Access-Control-Allow-Headers']='Content-Type'
-      
+
   def get(self, *args):
     self.response.headers['Access-Control-Allow-Origin']='*'
     user = users.get_current_user()
@@ -55,6 +55,7 @@ class TemplatePage(GenericPage):
     template = loader.load_template(templateName)
     context={}
     context['user']=user
+    context['admin']=users.is_current_user_admin()
     self.processContext(method.upper(), user, req, resp, args, context)
     body=template.merge(context, loader=loader)
 #    resp.headers['Content-Type']='text/html'

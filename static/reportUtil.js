@@ -23,7 +23,7 @@ function label(lab, arr)
 
 function normalize(arr)
 {
-  var results=[["Packet Length", "Probability"]];
+  var results=[["Packet Length", "Count"]];
   total=0;
   for(var x=0; x<arr.length; x++)
   {
@@ -71,53 +71,6 @@ function drawLengthCounts()
     chart.draw(data, options);    
 }
 
-function drawLengthProbs()
-{
-    var data = google.visualization.arrayToDataTable(normalize(report['incoming']['lengths']));
-    
-    var options = {
-      'title':'Incoming Stream: Probability of Packet with a Given Length',
-      'width':600, 'height':300,
-      'orientation': 'horizontal',
-      'legend': {
-        'position': 'none'
-      },
-      'vAxis': {
-        'maxValue': 1
-      },
-      'hAxis': {
-        'maxValue': 1500,
-        'minValue': 0
-      }
-    };
-
-    chart = new google.visualization.BarChart(document.getElementById('incomingLengthProbs'));
-    chart.draw(data, options);
-
-    /* ------------- */
-    
-    data = google.visualization.arrayToDataTable(normalize(report['outgoing']['lengths']));
-    
-    options = {
-      'title':'Outgoing Stream: Probability of Packet with a Given Length',
-      'width':600, 'height':300,
-      'orientation': 'horizontal',
-      'legend': {
-        'position': 'none'
-      },
-      'vAxis': {
-        'maxValue': 1
-      },
-      'hAxis': {
-        'maxValue': 1500,
-        'minValue': 0
-      }
-    };
-
-    chart = new google.visualization.BarChart(document.getElementById('outgoingLengthProbs'));
-    chart.draw(data, options);    
-}
-
 function drawEntropies()
 {
     var data = google.visualization.arrayToDataTable(label(["Dataset", 'Entropy'], report.incoming.entropy));
@@ -128,13 +81,6 @@ function drawEntropies()
       'orientation': 'horizontal',
       'legend': {
         'position': 'none'
-      },
-      'vAxis': {
-        'maxValue': 10,
-        'minValue': 0
-      },
-      'hAxis': {
-        'textPosition': 'none'
       }
     };
 
@@ -151,13 +97,6 @@ function drawEntropies()
       'orientation': 'horizontal',
       'legend': {
         'position': 'none'
-      },
-      'vAxis': {
-        'maxValue': 10,
-        'minValue': 0
-      },
-      'hAxis': {
-        'textPosition': 'none'
       }
     };
 
@@ -168,8 +107,7 @@ function drawEntropies()
 $(document).ready(function() {
   function drawChart()
   {
-//    drawLengthCounts();
-    drawLengthProbs();
+    drawLengthCounts();
     drawEntropies();
   }
     
