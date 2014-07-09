@@ -3,6 +3,7 @@
     <title>Report on $pcap.filename | AdversaryLab</title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <link href="/css/polymer.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/adLab.css" rel="stylesheet" type="text/css"/>
     <script src="/js/lib/polymer/components/platform/platform.js"></script>
     <link rel="import" href="/js/lib/polymer/components/font-roboto/roboto.html">
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
