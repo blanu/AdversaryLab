@@ -1,0 +1,14 @@
+
+ core-scaffold core-header-panel core-toolbar
+ {
+   background: #7dc5f2;
+   font-family: 'Nunito', sans-serif;
+   font-weight: 400; 
+ }
+  
+  core-scaffold::shadow core-toolbar
+  {
+    background: #7dc5f2;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 300; 
+  }
