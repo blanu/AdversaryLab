@@ -23,11 +23,11 @@
       <div tool>Upload Pcaps</div>
       <div id="content">
         <div id="contentText">
-      	  <div class="smallText">Select a pcap file to run it against our simulated deep packet inspection filtering algorithms.</div>
-      	  <div class="smallText">Specify the port that your traffic uses. The captured traffic will automatically be split into separate streams and extraneous traffic not using the specified port will be ignored. Traffic to the port will be marked as outgoing while traffic from that port will be marked as incoming.</div>
+      	  <div class="smallText">Select a pcap file to run it against our simulated deep packet inspection filtering algorithms.  Specify the port that your traffic uses. The captured traffic will automatically be split into separate streams and extraneous traffic not using the specified port will be ignored. Traffic to the port will be marked as outgoing while traffic from that port will be marked as incoming.</div>
         </div>
     	  <br/>
     	  <div class="holder">
+    	  	  <div id="contentText">
     		  <div id="uploader">
     			  <form enctype="multipart/form-data" method="post" data-bind="attr {action: uploadCode}">
     				  <div class="rect">
@@ -45,6 +45,7 @@
               </div>
             </form>
           </div>
+    	  	  </div>
         </div>
     </core-scaffold>
   </body>
