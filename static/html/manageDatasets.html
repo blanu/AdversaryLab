@@ -21,13 +21,14 @@
   
       <div tool>Upload Pcaps : Adversary Lab</div>
 	    <div id="content">
-        <ul id="datasets">
-          #foreach($dataset in $datasets)
-          <li>
-            $dataset.name <a href="/dataset?dataset=$dataset.name">View Report</a>
-          </li>
-          #end
-        </ul>
+        <table>
+          <tbody id="datasets" data-bind="foreach: datasets">
+            <tr>
+              <td data-bind="text: name"></td>
+              <td><a data-bind="attr {name: name}"></a></td>
+            </tr>
+          </tbody>
+        </table>
   
         <button id="addDataset">Add dataset</button>
       </div>  
@@ -55,5 +56,5 @@
   <script type="text/javascript">
     userid="$userid";
   </script>
-  <script type="text/javascript" src="/js/index.js"></script>
+  <script type="text/javascript" src="/js/manageDataset.js"></script>
 </html>

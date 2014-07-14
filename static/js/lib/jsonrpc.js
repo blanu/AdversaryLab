@@ -9,6 +9,27 @@ function jsonrpc(url, methodName, params)
   $.post(url, data);  
 }
 
+function wrap(callback)
+{
+  if(callback!=null)
+  {
+    return function(data) {callback(data.result);};
+  }
+  else
+  {
+    return function(data) {};
+  }
+}
+
+function jsonrpcCallback(url, methodName, params, callback)
+{
+  var id=lastid;
+  lastid=lastid+1;
+
+  var data=JSON.stringify({'method': methodName, 'params': params, 'id': id});
+  $.post(url, data, wrap(callback));
+}
+
 protocol={
   add: function(name)
   {
@@ -20,7 +41,11 @@ dataset={
   add: function(name)
   {
     jsonrpc('/api/dataset', 'add', [name]);
-  } 
+  },
+  list: function(callback)
+  {
+    jsonrpcCallback('/api/dataset', 'list', [], callback);
+  }
 };
 
 pcap={
