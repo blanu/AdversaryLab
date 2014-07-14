@@ -25,27 +25,13 @@
             <tr>
               <td data-bind="text: filename"></td>
               <td>
-                <select class="pcapDataset" data-bind="attr {filekey: filekey}">
-                  <option value=""></option>
-                #foreach($dataset in $datasets)
-                  #if($pcap.dataset && $dataset.name==$pcap.dataset.name)
-                  <option value="$dataset.name" selected="true">$dataset.name</option>
-                  #else
-                  <option value="$dataset.name">$dataset.name</option>
-                  #end
-                #end
+                <select class="pcapDataset" data-bind="attr {filekey: filekey}, foreach: datasets">
+                  <option data-bind="text: name, attr {value: name, selected: selected}"></option>
                 </select>
               </td>
               <td>
-                <select class="pcapProtocol" filekey="$pcap.filekey.key()">
-                  <option value=""></option>
-                #foreach($prot in $prots)
-                  #if($pcap.protocol && $prot.name==$pcap.protocol.name)
-                  <option value="$prot.name" selected="true">$prot.name</option>
-                  #else
-                  <option value="$prot.name">$prot.name</option>
-                  #end
-                #end
+                <select class="pcapProtocol" data-bind="attr {filekey: filekey, foreach: protocols}">
+                  <option data-bind="text: name, attr{value: name, selected: selected}"></option>
                 </select>
               </td>
             </tr>
@@ -72,8 +58,5 @@
   <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>  
   <script type="text/javascript" src="/js/lib/debug.js"></script>
   <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
-  <script type="text/javascript">
-    userid="$userid";
-  </script>
   <script type="text/javascript" src="/js/organize.js"></script>
 </html>

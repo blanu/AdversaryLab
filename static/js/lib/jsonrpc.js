@@ -64,5 +64,9 @@ pcap={
   upload: function()
   {
     jsonrpc('/api/pcap', 'uploadCode', []);
+  },
+  list: function(callback)
+  {
+    jsonrpcCallback('/api/pcap', 'list', [], callback);
   }
 };

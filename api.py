@@ -96,7 +96,7 @@ class PcapService(JsonRpcService):
     results=[]
     pcaps=PcapFile.all().filter("uploader =", user).fetch(100)
     for pcap in pcaps:
-      results.append({'name': pcap.name, 'filekey': pcap.filekey, 'status': pcap.status})
+      results.append({'filename': pcap.filename, 'filekey': str(pcap.filekey.key()), 'status': pcap.status})
     return results
 
   def json_setProtocol(self, filekey, protocol):
