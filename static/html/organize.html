@@ -3,13 +3,14 @@
     <title>Dashboard | AdversaryLab</title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <link href="/css/polymer.css" rel="stylesheet" type="text/css"/>
+     <link href="/css/adLab.css" rel="stylesheet" type="text/css"/>
     <script src="/js/lib/polymer/components/platform/platform.js"></script>
     <link rel="import" href="/js/lib/polymer/components/font-roboto/roboto.html">
   </head>
   <body fullbleed unresolved touch-action="auto">
     <core-scaffold>
       <core-header-panel navigation flex mode="seamed">        
-        <core-toolbar>Menu</core-toolbar>
+        <core-toolbar><img src="/static/images/A.png" width="27" height="40">  Adversary Lab  </core-toolbar>
         <core-menu theme="core-light-theme" selected="3">
   	      <core-item label="Upload Pcaps"><a href="/"></a></core-item>
   	      <core-item label="Manage Datasets"><a href="/manageDatasets"></a></core-item>
@@ -18,7 +19,7 @@
         </core-menu>
       </core-header-panel>  
   
-      <div tool>Upload Pcaps : Adversary Lab</div>
+      <div tool>Organize Pcaps</div>
 	    <div id="content">
         <table id="classifiedPcaps">
           <tbody data-bind="foreach: pcaps">
