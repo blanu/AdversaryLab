@@ -21,13 +21,14 @@
   
       <div tool>Upload Pcaps : Adversary Lab</div>
 	    <div id="content">
-        <ul id="prots">
-          #foreach($prot in $prots)
-          <li>
-            $prot.name <a href="/protocolReport?protocol=$prot.name">View Report</a>
-          </li>
-          #end
-        </ul>
+        <table>
+          <tbody id="protocols" data-bind="foreach: protocols">
+            <tr>
+              <td data-bind="text: name"></td>
+              <td><a data-bind="attr {name: name}"></a></td>
+            </tr>
+          </tbody>
+        </table>
   
         <button id="addProtocol">Add protocol</button>
       </div>
@@ -54,5 +55,5 @@
   <script type="text/javascript">
     userid="$userid";
   </script>
-  <script type="text/javascript" src="/js/index.js"></script>
+  <script type="text/javascript" src="/js/manageProtocols.js"></script>
 </html>

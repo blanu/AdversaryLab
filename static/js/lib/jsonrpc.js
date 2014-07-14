@@ -34,7 +34,11 @@ protocol={
   add: function(name)
   {
     jsonrpc('/api/protocol', 'add', [name]);
-  } 
+  },
+  list: function(callback)
+  {
+    jsonrpcCallback('/api/protocol', 'list', [], callback);
+  }
 };
 
 dataset={

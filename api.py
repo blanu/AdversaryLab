@@ -38,7 +38,7 @@ class ProtocolService(JsonRpcService):
 
     results=[]
     prots=Protocol.all().filter("creator =", user).fetch(100)
-    for prot in prot:
+    for prot in prots:
       results.append(prot.name)
     return results
 
