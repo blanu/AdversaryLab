@@ -3,6 +3,7 @@
     <title>Dashboard | AdversaryLab</title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <link href="/css/polymer.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/adLab.css" rel="stylesheet" type="text/css"/>
     <script src="/js/lib/polymer/components/platform/platform.js"></script>
     <link rel="import" href="/js/lib/polymer/components/font-roboto/roboto.html">
   </head>
@@ -10,50 +11,38 @@
     <core-scaffold>
       <core-header-panel navigation flex mode="seamed">        
         <core-toolbar>Menu</core-toolbar>
-        <core-menu theme="core-light-theme" selected="3">
-  	      <core-item label="Upload Pcaps"><a href="/"></a></core-item>
+        <core-menu theme="core-light-theme" selected="0">
+  	      <core-item label="Upload Pcaps"></core-item>
   	      <core-item label="Manage Datasets"><a href="/manageDatasets"></a></core-item>
   	      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
-  	      <core-item label="Organize Pcaps"></core-item>
+  	      <core-item label="Organize Pcaps"><a href="/organize"></a></core-item>
         </core-menu>
       </core-header-panel>  
-  
+
       <div tool>Upload Pcaps : Adversary Lab</div>
-	    <div id="content">
-        <table id="classifiedPcaps">
-        #foreach($pcap in $pcaps)
-          <tr>
-            <td>
-              $pcap.filename
-            </td>
-            <td>
-              <select class="pcapDataset" filekey="$pcap.filekey.key()">
-                <option value=""></option>
-              #foreach($dataset in $datasets)
-                #if($pcap.dataset && $dataset.name==$pcap.dataset.name)
-                <option value="$dataset.name" selected="true">$dataset.name</option>
-                #else
-                <option value="$dataset.name">$dataset.name</option>
-                #end
-              #end
-              </select>
-            </td>
-            <td>
-              <select class="pcapProtocol" filekey="$pcap.filekey.key()">
-                <option value=""></option>
-              #foreach($prot in $prots)
-                #if($pcap.protocol && $prot.name==$pcap.protocol.name)
-                <option value="$prot.name" selected="true">$prot.name</option>
-                #else
-                <option value="$prot.name">$prot.name</option>
-                #end
-              #end
-              </select>
-            </td>
-          </tr>
-          #end
-        </table>
-	    </div>
+      <div id="content">
+    	  <div class="smallText">Select a pcap file to run it against our simulated deep packet inspection filtering algorithms.</div>
+    	  <div class="smallText">Specify the port that your traffic uses. The captured traffic will automatically be split into separate streams and extraneous traffic not using the specified port will be ignored. Traffic to the port will be marked as outgoing while traffic from that port will be marked as incoming.</div>
+    	  <br/>
+    	  <div class="holder">
+    		  <div id="uploader">
+    			  <form enctype="multipart/form-data" method="post" data-bind="attr {action: uploadCode}">
+    				  <div class="rect">
+    					  <div class="choose">
+    						  <input id="pcapUpload" type="file" name="pcapFile"/>
+    						  Port <input id="port" type="text" name="port"/>
+    						  <input type="submit" value="Upload"/>
+                  <select class="pcapUploadDataset" name="pcapUploadDataset" data-bind="foreach: datasets">
+                      <option data-bind="text: name, attr {value: name}"></option>
+                  </select>						  
+                  <select class="pcapUploadProtocol" name="pcapUploadProtocol" data-bind="foreach: prots">
+                      <option data-bind="text: name, attr {value: name}"></option>
+                  </select>						  
+    					  </div>
+              </div>
+            </form>
+          </div>
+        </div>
     </core-scaffold>
   </body>
 
@@ -78,4 +67,4 @@
     userid="$userid";
   </script>
   <script type="text/javascript" src="/js/index.js"></script>
-</html>
+</html>    

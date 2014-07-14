@@ -11,22 +11,10 @@ from pages import *
 from api import *
 
 app = webapp.WSGIApplication([
-  ('/', Index),
-  ('/index.html', Index),
-  ('/welcome', Welcome),
   ('/login', Login),
-  ('/dashboard', DashboardIndex),
   ('/upload', Upload),
   ('/download', Download),
-  ('/report', Report),
   ('/uploadReport', UploadReport),
-  ('/process', ForceProcess),
-  ('/protocolReport', ProtocolReport),
-  ('/dataset', DatasetIndex),
-  ('/datasetReport', DatasetReport),
-  ('/manageProtocols', ManageProtocols),
-  ('/manageDatasets', ManageDatasets),
-  ('/organize', Organize),
 
   ('/api/protocol', ProtocolService),
   ('/api/dataset', DatasetService),

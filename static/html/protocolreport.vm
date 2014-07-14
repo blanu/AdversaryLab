@@ -1,8 +1,9 @@
 <html>
   <head>
-    <title>Report on $dataset.name / $protocol.name | AdversaryLab</title>
+    <title>Report on $protocol.name | AdversaryLab</title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <link href="/css/polymer.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/adLab.css" rel="stylesheet" type="text/css"/>
     <script src="/js/lib/polymer/components/platform/platform.js"></script>
     <link rel="import" href="/js/lib/polymer/components/font-roboto/roboto.html">
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -15,26 +16,41 @@
       <core-header-panel navigation flex mode="seamed">        
         <core-toolbar>Menu</core-toolbar>
         <core-menu theme="core-light-theme">
-  	      <core-item label="Upload Pcaps"><a href="/"></a></core-item>
+  	      <core-item label="Upload Pcaps"><a href="/dashboard"></a></core-item>
   	      <core-item label="Manage Datasets"><a href="/manageDatasets"></a></core-item>
   	      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
   	      <core-item label="Organize Pcaps"></core-item>
         </core-menu>
       </core-header-panel>  
 	  
-      <div tool>$dataset.name</div>
+      <div tool>Report on $protocol.name</div>
       <div id="content">
-        <div id="protocolSection">
-          <ul id="prots">
-            #foreach($prot in $prots)
-            <li>
-              $prot.name <a href="/datasetReport?dataset=$dataset.name&protocol=$prot.name">View Report</a>
-            </li>
-            #end
-          </ul>
-    
-          <button id="addProtocol">Add protocol</button>
-        </div>
+        <p>
+          <h2>Length Report</h2>
+          <div class="graph">      
+            <p>
+              <div id="incomingLengthProbs" style="padding: 4px;"></div>
+              <div id="outgoingLengthProbs" style="padding: 4px;"></div>
+            </p>
+          </div>
+        </p>
+        <p>
+          <h2>Entropy Report</h2>
+          <div class="smallText2">
+            <p>
+              <div id="incomingEntropy" style="padding: 4px;"></div>
+              <div id="outgoingEntropy" style="padding: 4px;"></div>
+            </p>
+          </div>
+        </p>
+  
+        <p>      
+          <div class="pcapButton">
+            <p>
+            <a href="/download?filekey=$pcap.filekey.key()"><img src="/static/images/pcatButton.png" width="332" height="65"/></a>
+            </p>
+          </div> 
+        </p>
   	  </div>
     </core-scaffold>
 
@@ -57,7 +73,12 @@
     <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
     <script type="text/javascript">
       userid="$userid";
+      #if($report)
+      report=$report;
+      #else
+      report=null;
+      #end
     </script>
-    <script type="text/javascript" src="/static/index.js"></script>
+    <script type="text/javascript" src="/static/report.js"></script>
   </body>
 </html>

@@ -15,7 +15,7 @@
       <core-header-panel navigation flex mode="seamed">        
         <core-toolbar>Menu</core-toolbar>
         <core-menu theme="core-light-theme">
-  	      <core-item label="Upload Pcaps"><a href="/"></a></core-item>
+  	      <core-item label="Upload Pcaps"><a href="/dashboard"></a></core-item>
   	      <core-item label="Manage Datasets"><a href="/manageDatasets"></a></core-item>
   	      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
   	      <core-item label="Organize Pcaps"></core-item>

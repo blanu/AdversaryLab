@@ -32,3 +32,22 @@
       width: 400px;
     }
   }
+
+ core-scaffold core-header-panel core-toolbar
+ {
+   background: green;
+ }
+  
+  core-scaffold::shadow core-toolbar
+  {
+    background: black;
+    
+  }
+  
+/*
+  core-scaffold /deep/ core-toolbar
+  {
+    background: red;
+  }
+  
+*/
