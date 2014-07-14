@@ -34,7 +34,7 @@
     					  <div class="choose">
     						  <input id="pcapUpload" type="file" name="pcapFile"/>
     						  <paper-input id="port" name="port" label="Port"></paper-input>
-    						  <input type="submit" value="Upload"/>
+    						  <paper-button label="Upload" raisedButton></paper-button>
                   <select class="pcapUploadDataset" name="pcapUploadDataset" data-bind="foreach: datasets">
                       <option data-bind="text: name, attr {value: name}"></option>
                   </select>						  
@@ -60,6 +60,7 @@
   <link rel="import" href="/js/lib/polymer/components/core-icons/core-icons.html">
   <link rel="import" href="/js/lib/polymer/components/paper-tabs/paper-tabs.html">
   <link rel="import" href="/js/lib/polymer/components/paper-input/paper-input.html">
+  <link rel="import" href="/js/lib/polymer/components/paper-button/paper-button.html">
 
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
