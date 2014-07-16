@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <title>Report on <span class="reportName" data-bind="text: filename"></span> | AdversaryLab</title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <link href="/css/polymer.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/adLab.css" rel="stylesheet" type="text/css"/>
+    <script src="/js/lib/polymer/components/platform/platform.js"></script>
+    <link rel="import" href="/js/lib/polymer/components/font-roboto/roboto.html">
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1.0', {'packages':['corechart']});
+    </script>    
+  </head>
+  <body fullbleed unresolved touch-action="auto">
+    <core-scaffold>
+      <core-header-panel navigation flex mode="seamed">        
+        <core-toolbar>Menu</core-toolbar>
+        <core-menu theme="core-light-theme" selected="3">
+  	      <core-item label="Upload Pcaps"><a href="/dashboard"></a></core-item>
+  	      <core-item label="Manage Datasets"><a href="/manageDatasets"></a></core-item>
+  	      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
+  	      <core-item label="Organize Pcaps"></core-item>
+        </core-menu>
+      </core-header-panel>  
+	  
+      <div tool>Report on <span class="reportName" data-bind="text: filename"></span></div>
+      <div id="content">
+        <p>
+          <h2>Length Report</h2>
+          <div class="graph">      
+            <p>
+              <div id="incomingLengthProbs" style="padding: 4px;"></div>
+              <div id="outgoingLengthProbs" style="padding: 4px;"></div>
+            </p>
+          </div>
+        </p>
+        <p>
+          <h2>Entropy Report</h2>
+          <div class="smallText2">
+            <p>
+              <div id="incomingEntropy" style="padding: 4px;"></div>
+              <div id="outgoingEntropy" style="padding: 4px;"></div>
+            </p>
+          </div>
+        </p>  
+  	  </div>
+    </core-scaffold>
+
+    <link rel="import" href="/js/lib/polymer/components/core-scaffold/core-scaffold.html">
+    <link rel="import" href="/js/lib/polymer/components/core-header-panel/core-header-panel.html">
+    <link rel="import" href="/js/lib/polymer/components/core-toolbar/core-toolbar.html">
+    <link rel="import" href="/js/lib/polymer/components/core-menu/core-menu.html">
+    <link rel="import" href="/js/lib/polymer/components/core-item/core-item.html">
+    <link rel="import" href="/js/lib/polymer/components/core-selector/core-selector.html">
+    <link rel="import" href="/js/lib/polymer/components/core-selection/core-selection.html">
+    <link rel="import" href="/js/lib/polymer/components/core-icons/core-icons.html">
+    <link rel="import" href="/js/lib/polymer/components/paper-tabs/paper-tabs.html">
+    <link rel="import" href="/js/lib/polymer/components/paper-input/paper-input.html">
+  
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/js/lib/knockout.js"></script>
+    <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>  
+    <script type="text/javascript" src="/js/lib/debug.js"></script>
+    <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
+    <script type="text/javascript" src="/static/report.js"></script>
+  </body>
+</html>

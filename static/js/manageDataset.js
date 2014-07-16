@@ -13,6 +13,11 @@ $(document).ready(function () {
       model.datasets.push({"name": results[index]});
     }
     log(model.datasets());
+    
+    $('.reportLink').each(function() {
+      var dataset=$(this).attr('filekey');    
+      $(this).attr('href', '/datasetReport?dataset='+dataset);
+    });
   });
 
   $("#addDataset").click(function(button) {
@@ -34,5 +39,5 @@ $(document).ready(function () {
       li.empty().append(name);
       dataset.add(name);
     });
-  })  
+  })    
 });

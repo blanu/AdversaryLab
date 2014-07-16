@@ -12,6 +12,11 @@ $(document).ready(function () {
       log(results[index]);
       model.protocols.push({"name": results[index]});
     }
+    
+    $('.reportLink').each(function() {
+      var protocol=$(this).attr('filekey');    
+      $(this).attr('href', '/protocolReport?protocol='+protocol);
+    });    
   });
 
   $("#addProtocol").click(function(button) {
@@ -33,5 +38,5 @@ $(document).ready(function () {
       li.empty().append(name);
       protocol.add(name);
     });
-  })  
+  });  
 });
