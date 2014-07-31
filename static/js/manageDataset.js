@@ -1,9 +1,13 @@
 var model={
-  datasets: ko.observableArray([])
+  datasets: ko.observableArray([]),
+  admin: ko.observable(false),
+  logout: ko.observable('')
 }
 
 $(document).ready(function () {
   ko.applyBindings(model);
+  
+  login(model);
   
   dataset.list(function(results) {
     log(results);
@@ -16,7 +20,7 @@ $(document).ready(function () {
     
     $('.reportLink').each(function() {
       var dataset=$(this).attr('filekey');    
-      $(this).attr('href', '/datasetReport?dataset='+dataset);
+      $(this).attr('href', '/protocols?dataset='+dataset);
     });
   });
 

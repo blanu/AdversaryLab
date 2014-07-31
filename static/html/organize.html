@@ -21,7 +21,7 @@
   
       <div tool>Organize Pcaps</div>
 	    <div id="content">
-        <table id="classifiedPcaps">
+        <table id="classifiedPcaps" data-bind="ifnot: empty">
           <tbody data-bind="foreach: pcaps">
             <tr>
               <td data-bind="text: filename"></td>
@@ -41,6 +41,9 @@
             </tr>
           </tbody>
         </table>
+	      <div data-bind="if: empty">
+	        No pcaps.
+	      </div>
 	    </div>
     </core-scaffold>
   </body>
@@ -62,5 +65,6 @@
   <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>  
   <script type="text/javascript" src="/js/lib/debug.js"></script>
   <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
+  <script type="text/javascript" src="/js/login.js"></script>
   <script type="text/javascript" src="/js/organize.js"></script>
 </html>

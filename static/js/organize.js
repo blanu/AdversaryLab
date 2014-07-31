@@ -1,7 +1,10 @@
 var model={
   pcaps: ko.observableArray([]),
   datasets: ko.observableArray([]),
-  protocols: ko.observableArray([])
+  protocols: ko.observableArray([]),
+  empty: ko.observable(true),
+  admin: ko.observable(false),
+  logout: ko.observable('')
 }
 
 function fixLinks()
@@ -16,6 +19,8 @@ function fixLinks()
 $(document).ready(function () {
   ko.applyBindings(model);
   
+  login(model);
+  
   protocol.list(function(results) {
     for(var index in results)
     {
@@ -29,6 +34,8 @@ $(document).ready(function () {
       }
       
       pcap.list(function(results) {
+        model.empty(results.length==0);
+      
         for(var index in results)
         {
           var result=results[index];

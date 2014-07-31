@@ -14,8 +14,15 @@ class Dataset(db.Model):
 class PcapStats(db.Model):
   lengths=db.ListProperty(int)
   entropies=db.ListProperty(float)
+  content=db.ListProperty(int)
+
+class PcapStreamStats(db.Model):
+  volume=db.ListProperty(int)
+  direction=db.ListProperty(float)
+  directedVolume=db.ListProperty(int)
 
 class PcapReport(db.Model):
+  stream=db.ReferenceProperty(PcapStreamStats, required=False)
   incoming=db.ReferenceProperty(PcapStats, collection_name="incoming_set", required=False)
   outgoing=db.ReferenceProperty(PcapStats, collection_name="outgoing_set", required=False)
 

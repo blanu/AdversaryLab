@@ -80,20 +80,45 @@ class CaptureStats:
     stats=PcapReport()
     stats.incoming=self.compileSide(0)
     stats.outgoing=self.compileSide(1)
+    stats.stream=self.compileStream()
     stats.save()
     return stats
 
   def compileSide(self, selector):
     lengths=[0]*1500
     entropies=[]
+    counts=[0]*256
+    bps=[]
     for sid in self.streams.keys():
       stream=self.streams[sid]
-      ls, e=stream.compile()[selector]
+      ls, e, cs, bs=stream.compile()[selector]
       for x in range(len(ls)):
         lengths[x]=lengths[x]+ls[x]
       if e!=0:
         entropies.append(e)
-    stats=PcapStats(lengths=lengths, entropies=entropies)
+      for x in range(len(cs)):
+        counts[x]=counts[x]+cs[x]
+      bps.append(bs)
+    stats=PcapStats(lengths=lengths, entropies=entropies, content=counts, bps=bps)
+    stats.save()
+    return stats
+
+  def compileStream(self):
+    lengths=[0]*1500
+    entropies=[]
+    counts=[0]*256
+    bps=[]
+    for sid in self.streams.keys():
+      stream=self.streams[sid]
+      ls, e, cs, bs=stream.compile()[selector]
+      for x in range(len(ls)):
+        lengths[x]=lengths[x]+ls[x]
+      if e!=0:
+        entropies.append(e)
+      for x in range(len(cs)):
+        counts[x]=counts[x]+cs[x]
+      bps.append(bs)
+    stats=PcapStats(lengths=lengths, entropies=entropies, content=counts, bps=bps)
     stats.save()
     return stats
 
@@ -101,6 +126,7 @@ class StreamStats:
   def __init__(self, connid, port):
     self.id=connid
     self.port=port
+    self.startTime=0
 
     self.incoming=SideStats()
     self.outgoing=SideStats()
@@ -109,6 +135,10 @@ class StreamStats:
     ports=getPorts(packet)
     if ports:
       sport, dport=ports
+      if self.startTime==0:
+        self.startTime=int(packet.time)
+        self.incoming.setStartTime(self.startTime)
+        self.outgoing.setStartTime(self.startTime)
       if sport==self.port:
         self.incoming.processPacket(packet)
       elif dport==self.port:
@@ -117,13 +147,44 @@ class StreamStats:
         logging.error("Unknown ports %d/%d, expecting %d" % (sport, dport, self.port))
 
   def compile(self):
-    return (self.incoming.compile(), self.outgoing.compile())
+    i=self.incoming.compile()
+    o=self.outgoing.compile()
+    return (i, o, self.compileBps(i, o))
+
+  def compileBps(self, is, os):
+    volume=[]
+    direction=[]
+    directedVolume=[]
+
+    for (i, o) in zip(ios, os):
+      volume.append(i+o)
+      directedVolume.append(i-o)
+      if i==0 and o==0:
+        directedVolume.append(0)
+      elif i==0:
+        directedVolume.append(1)
+      elif o==0:
+        directedVolume.append(-1)
+      else:
+        avg=float(i)/float(i+o)
+        direction.append((avg-0.5)*2)
+
+    return (volume, direction)
 
 class SideStats:
   def __init__(self):
+    self.startTime=0
+    self.currentTime=0
+    self.currentBps=0
+
     self.lengths=[0]*1500
     self.total=0
     self.counts=[0]*256
+    self.bps=[]
+
+  def setStartTime(self, st):
+    self.startTime=st
+    self.currentTime=self.startTime
 
   def processPacket(self, packet):
     if 'IP' in packet:
@@ -132,6 +193,7 @@ class SideStats:
         if l<len(self.lengths):
           self.lengths[l]=self.lengths[l]+1
           logging.info("packet of length %d" % (l))
+          self.addBps(int(packet.time), l)
         else:
           logging.error("Packet length too big: %d" % (l))
       except:
@@ -143,6 +205,7 @@ class SideStats:
         if l<len(self.lengths):
           self.lengths[l]=self.lengths[l]+1
           logging.info("packet of length %d" % (l))
+          self.addBps(int(packet.time), l)
         else:
           logging.error("Packet length too big: %d" % (l))
       except:
@@ -161,6 +224,21 @@ class SideStats:
         x=ord(c)
         self.counts[x]=self.counts[x]+1
 
+  def addBps(self, time, length):
+    if time==self.currentTime:
+      self.currentBps=self.currentBps+length
+    elif time>self.currentTime:
+      self.bps.append(self.currentBps)
+
+      gap=time-self.currentTime
+      for index in range(gap)-1:
+        self.bps.append(0)
+
+      self.currentBps=0
+      self.currentTime=time
+    else:
+      logging.error('Time moving backwords: %d %d' % (time, self.currentTime))
+
   def compile(self):
     u=0
     for count in self.counts:
@@ -175,7 +253,7 @@ class SideStats:
         logging.error('entropy: '+str(e))
       u=u+e
 
-    return (self.lengths, float(u))
+    return (self.lengths, float(u), self.counts, self.bps)
 
 def processPcap(blobkey):
   blob_info=blobstore.get(blobkey)

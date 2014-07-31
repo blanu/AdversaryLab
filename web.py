@@ -16,9 +16,11 @@ app = webapp.WSGIApplication([
   ('/download', Download),
   ('/uploadReport', UploadReport),
 
+  ('/api/user', UserService),
   ('/api/protocol', ProtocolService),
   ('/api/dataset', DatasetService),
-  ('/api/pcap', PcapService)
+  ('/api/pcap', PcapService),
+  ('/api/report', ReportService)
 ], debug=True)
 
 def main():

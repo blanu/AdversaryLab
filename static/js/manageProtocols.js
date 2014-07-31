@@ -1,9 +1,13 @@
 var model={
-  protocols: ko.observableArray([])
+  protocols: ko.observableArray([]),
+  admin: ko.observable(false),
+  logout: ko.observable('')
 }
 
 $(document).ready(function () {
   ko.applyBindings(model);
+  
+  login(model);
   
   protocol.list(function(results) {
     log(results);

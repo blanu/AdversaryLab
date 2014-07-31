@@ -30,6 +30,37 @@ function jsonrpcCallback(url, methodName, params, callback)
   $.post(url, data, wrap(callback));
 }
 
+user={
+  isLoggedIn: function(callback)
+  {
+    jsonrpcCallback('/api/user', 'isLoggedIn', [], callback);
+  },
+  isAdmin: function(callback)
+  {
+    jsonrpcCallback('/api/user', 'isAdmin', [], callback);
+  },
+  isMember: function(callback)
+  {
+    jsonrpcCallback('/api/user', 'isMember', [], callback);
+  },
+  login: function(callback)
+  {
+    jsonrpcCallback('/api/user', 'login', [], callback);
+  },
+  logout: function(callback)
+  {
+    jsonrpcCallback('/api/user', 'logout', [], callback);
+  },
+  apply: function(username, application)
+  {
+    jsonrpc('/api/user', 'apply', [username, application]);
+  },
+  hasApplied: function(callback)
+  {
+    jsonrpcCallback('/api/user', 'hasApplied', [], callback);
+  }
+};
+
 protocol={
   add: function(name)
   {
@@ -61,12 +92,27 @@ pcap={
   {
     jsonrpc('/api/pcap', 'setDataset', [filekey, name]);
   },
-  upload: function()
+  upload: function(callback)
   {
-    jsonrpc('/api/pcap', 'uploadCode', []);
+    jsonrpcCallback('/api/pcap', 'uploadCode', [], callback);
   },
   list: function(callback)
   {
     jsonrpcCallback('/api/pcap', 'list', [], callback);
+  }
+};
+
+reports={
+  getForPcap: function(filekey, callback)
+  {
+    jsonrpcCallback('/api/report', 'getForPcap', [filekey], callback);
+  },
+  getForDatasetAndProtocol: function(dataset, protocol, callback)
+  {
+    jsonrpcCallback('/api/report', 'getForDatasetAndProtocol', [dataset, protocol], callback);
+  },
+  getForProtocol: function(filekey, callback)
+  {
+    jsonrpcCallback('/api/report', 'getForProtocol', [filekey], callback);
   }
 };

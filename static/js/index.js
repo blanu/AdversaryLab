@@ -1,5 +1,19 @@
+var model={
+  uploadCode: ko.observable(''),
+  admin: ko.observable(false),
+  logout: ko.observable('')
+};
+
 $(document).ready(function () {
   log("init index");
+  
+  ko.applyBindings(model);
+  
+  login(model);
+    
+  pcap.upload(function(result) {
+    model.uploadCode(result);
+  });
     
   $(".runButton").click(function(button) {
     log("clicked run");

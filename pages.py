@@ -26,7 +26,7 @@ import status
 from generic import TemplatePage, GenericPage, FilePage
 from models import *
 from util import *
-#from process import *
+from process import *
 
 class Index(TemplatePage):
   def processContext(self, method, user, req, resp, args, context):
@@ -146,26 +146,32 @@ class Upload(blobstore_handlers.BlobstoreUploadHandler):
     port=self.validatePort(self.request.get('port'))
     if not port:
       logging.error("Invalid port: "+self.request.get('port'))
-      self.redirect('/dashboard')
+      self.redirect('/')
       return
 
     datasetname=self.request.get('pcapUploadDataset')
-    dataset=Dataset.all().filter('dataset =', datasetname).get()
-
     protocolname=self.request.get('pcapUploadProtocol')
-    protocol=Dataset.all().filter('protocol =', protocolname).get()
 
     upload_files = self.get_uploads('pcapFile')  # 'file' is file upload field in the form
     logging.info('upload_files: '+str(upload_files))
     blob_info = upload_files[0]
     blobkey = blob_info.key()
+    filename=blob_info.filename
 
-    pcap=PcapFile(filename=blob_info.filename, uploader=user, filekey=blobkey, status=status.uploaded, port=port, dataset=dataset, protocol=protocol)
+    parts=filename.split('.')[0].split('-')
+    if len(parts)==4 and parts[0]=='sorted':
+      protocolname=parts[2]
+      datasetname=parts[3]
+
+    dataset=Dataset.all().filter('dataset =', datasetname).get()
+    protocol=Dataset.all().filter('protocol =', protocolname).get()
+
+    pcap=PcapFile(filename=filename, uploader=user, filekey=blobkey, status=status.uploaded, port=port, dataset=dataset, protocol=protocol)
     pcap.save()
 
-#    deferred.defer(processPcap, blobkey)
+    deferred.defer(processPcap, blobkey)
 
-    self.redirect('/dashboard')
+    self.redirect('/')
 
   def validatePort(self, portString):
     if not portString:

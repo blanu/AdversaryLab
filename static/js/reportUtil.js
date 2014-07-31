@@ -1,6 +1,6 @@
-function expand(arr)
+function expand(lab, arr)
 {
-  var results=[["Packet Length", "Count"]];
+  var results=[lab];
   for(var x=0; x<arr.length; x++)
   {
     results.push([x, arr[x]]);
@@ -11,7 +11,6 @@ function expand(arr)
 
 function label(lab, arr)
 {
-  log('label '+arr);
   var results=[lab];
   for(var x=0; x<arr.length; x++)
   {
@@ -21,9 +20,9 @@ function label(lab, arr)
   return results;
 }
 
-function normalize(arr)
+function normalize(lab, arr)
 {
-  var results=[["Packet Length", "Probability"]];
+  var results=[lab];
   total=0;
   for(var x=0; x<arr.length; x++)
   {
@@ -35,12 +34,15 @@ function normalize(arr)
     results.push([x, arr[x]/total]);
   }
   
+  log('normalized');
+  log(results);
+  
   return results;  
 }
 
-function drawLengthCounts()
+function drawLengthCounts(report)
 {
-    var data = google.visualization.arrayToDataTable(expand(report['incoming']['lengths']));
+    var data = google.visualization.arrayToDataTable(expand(["Packet Length", "Count"], report['incoming']['lengths']));
     
     var options = {
       'title':'Incoming Stream: Count of Packets with a Given Length',
@@ -56,7 +58,7 @@ function drawLengthCounts()
 
     /* ------------- */
     
-    data = google.visualization.arrayToDataTable(expand(report['outgoing']['lengths']));
+    data = google.visualization.arrayToDataTable(expand(["Packet Length", "Count"], report['outgoing']['lengths']));
     
     options = {
       'title':'Outgoing Stream: Count of Packets with a Given Length',
@@ -71,23 +73,19 @@ function drawLengthCounts()
     chart.draw(data, options);    
 }
 
-function drawLengthProbs()
+function drawLengthProbs(report)
 {
-    var data = google.visualization.arrayToDataTable(normalize(report['incoming']['lengths']));
+    var data = google.visualization.arrayToDataTable(normalize(["Packet Length", "Probability"], report['incoming']['lengths']));
     
     var options = {
-      'title':'Incoming Stream: Probability of Packet with a Given Length',
-      'width':600, 'height':300,
+      'title':'Incoming Stream: Probability of Packets with a Given Length',
+      'width':400, 'height':300,
       'orientation': 'horizontal',
       'legend': {
         'position': 'none'
       },
       'vAxis': {
         'maxValue': 1
-      },
-      'hAxis': {
-        'maxValue': 1500,
-        'minValue': 0
       }
     };
 
@@ -96,21 +94,17 @@ function drawLengthProbs()
 
     /* ------------- */
     
-    data = google.visualization.arrayToDataTable(normalize(report['outgoing']['lengths']));
+    data = google.visualization.arrayToDataTable(normalize(["Packet Length", "Probability"], report['outgoing']['lengths']));
     
     options = {
-      'title':'Outgoing Stream: Probability of Packet with a Given Length',
-      'width':600, 'height':300,
+      'title':'Outgoing Stream: Probability of Packets with a Given Length',
+      'width':400, 'height':300,
       'orientation': 'horizontal',
       'legend': {
         'position': 'none'
       },
       'vAxis': {
         'maxValue': 1
-      },
-      'hAxis': {
-        'maxValue': 1500,
-        'minValue': 0
       }
     };
 
@@ -118,7 +112,7 @@ function drawLengthProbs()
     chart.draw(data, options);    
 }
 
-function drawEntropies()
+function drawEntropies(report)
 {
     var data = google.visualization.arrayToDataTable(label(["Dataset", 'Entropy'], report.incoming.entropy));
     
@@ -130,11 +124,7 @@ function drawEntropies()
         'position': 'none'
       },
       'vAxis': {
-        'maxValue': 10,
-        'minValue': 0
-      },
-      'hAxis': {
-        'textPosition': 'none'
+        'maxValue': 8
       }
     };
 
@@ -153,11 +143,7 @@ function drawEntropies()
         'position': 'none'
       },
       'vAxis': {
-        'maxValue': 10,
-        'minValue': 0
-      },
-      'hAxis': {
-        'textPosition': 'none'
+        'maxValue': 8
       }
     };
 
@@ -165,16 +151,41 @@ function drawEntropies()
     chart.draw(data, options);
 }
 
-$(document).ready(function() {
-  function drawChart()
-  {
-//    drawLengthCounts();
-    drawLengthProbs();
-    drawEntropies();
-  }
+function drawContentProbs(report)
+{
+    var data = google.visualization.arrayToDataTable(normalize(["Byte Value", "Probability"], report['incoming']['content']));
     
-  google.setOnLoadCallback(drawChart);  
-  
-  $('#streamEntropy').text(report.entropy);
-  $('#firstEntropy').text(report['entropy-first']);
-});
+    var options = {
+      'title':'Incoming Stream: Probability of Byte with a Given Value',
+      'width':400, 'height':300,
+      'orientation': 'horizontal',
+      'legend': {
+        'position': 'none'
+      },
+      'vAxis': {
+        'maxValue': 0.05
+      }
+    };
+
+    chart = new google.visualization.BarChart(document.getElementById('incomingContentProbs'));
+    chart.draw(data, options);
+
+    /* ------------- */
+    
+    data = google.visualization.arrayToDataTable(normalize(["Byte Value", "Probability"], report['outgoing']['content']));
+    
+    options = {
+      'title':'Outgoing Stream: Probability of Byte with a Given Value',
+      'width':400, 'height':300,
+      'orientation': 'horizontal',
+      'legend': {
+        'position': 'none'
+      },
+      'vAxis': {
+        'maxValue': 0.05
+      }
+    };
+
+    chart = new google.visualization.BarChart(document.getElementById('outgoingContentProbs'));
+    chart.draw(data, options);    
+}

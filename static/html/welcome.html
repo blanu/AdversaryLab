@@ -6,22 +6,30 @@
   <link href='http://fonts.googleapis.com/css?family=Nunito:400,300' rel='stylesheet' type='text/css'>
   </head>
   <body>
-  <div class="container">
-	  <div class="top">
-		  <div class="micro">
-			  <img src="/static/images/micro.png" width="200" height="179"/>
-		  </div>
-	  </div>
-	  	
-	  <div class="bottom">   
-		  <div class="largeText">Welcome to AdversaryLab!</div>
-		  <div class="smallText">AdversaryLab is a cloud service that provides simulated Deep Packet Inspection filtering algorithms for the protocol obfuscation community. Upload network traffic samples and receive a report of performance against a variety of adversaries. Develop new obfuscating protocols in the lab before you test them in the field.</div>
-	    <p>
-	      <div class="button1">
-	      <a href="/login"><img src="/static/images/googleIcon.png"  width="368" height="65"/></a>
-	      </div>
-	    </p>
-	</div>
-  </div>
+    <div class="container">
+  	  <div class="top">
+  		  <div class="micro">
+  			  <img src="/static/images/micro.png" width="200" height="179"/>
+  		  </div>
+  	  </div>
+  	  	
+  	  <div class="bottom">   
+  		  <div class="largeText">Welcome to AdversaryLab!</div>
+  		  <div class="smallText">AdversaryLab is a cloud service that provides simulated Deep Packet Inspection filtering algorithms for the protocol obfuscation community. Upload network traffic samples and receive a report of performance against a variety of adversaries. Develop new obfuscating protocols in the lab before you test them in the field.</div>
+  	    <p>
+  	      <div class="button1">
+  	      <a data-bind="attr {href: login}"><img src="/static/images/googleIcon.png"  width="368" height="65"/></a>
+  	      </div>
+  	    </p>
+    	</div>
+    </div>
+    
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/js/lib/knockout.js"></script>
+    <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>  
+    <script type="text/javascript" src="/js/lib/debug.js"></script>
+    <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
+    <script type="text/javascript" src="/js/welcome.js"></script>
   </body>
 </html>
