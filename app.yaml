@@ -11,9 +11,12 @@ manual_scaling:
 
 vm_settings:
   machine_type: n1-standard-1
-  apt_get_install: python-scapy jags
+  apt_get_install: python-scapy build-essential pip
 
 handlers:
+- url: /_ah/start
+  script: start.app
+  
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
