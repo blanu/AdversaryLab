@@ -11,27 +11,28 @@ class Dataset(db.Model):
   creator=db.UserProperty(required=True)
   name=db.StringProperty(required=True)
 
-class PcapStats(db.Model):
-  lengths=db.ListProperty(int)
-  entropies=db.ListProperty(float)
-  content=db.ListProperty(int)
-
-class PcapStreamStats(db.Model):
-  volume=db.ListProperty(int)
-  direction=db.ListProperty(float)
-  directedVolume=db.ListProperty(int)
-
-class PcapReport(db.Model):
-  stream=db.ReferenceProperty(PcapStreamStats, required=False)
-  incoming=db.ReferenceProperty(PcapStats, collection_name="incoming_set", required=False)
-  outgoing=db.ReferenceProperty(PcapStats, collection_name="outgoing_set", required=False)
-
 class PcapFile(db.Model):
   uploader=db.UserProperty(required=True)
   filename=db.StringProperty(required=True)
   filekey=blobstore.BlobReferenceProperty(required=True)
   status=db.IntegerProperty(required=True)
   port=db.IntegerProperty(required=True)
-  report=db.ReferenceProperty(PcapReport, required=False)
   protocol=db.ReferenceProperty(Protocol, required=False)
   dataset=db.ReferenceProperty(Dataset, required=False)
+
+class Connection(db.Model):
+  pcap=db.ReferenceProperty(PcapFile, required=True)
+  incomingPort=db.IntegerProperty(required=True)
+  outgoingPort=db.IntegerProperty(required=True)
+
+class Stream(db.Model):
+  connection=db.ReferenceProperty(Connection, required=True)
+  srcPort=db.IntegerProperty(required=True)
+  dstPort=db.IntegerProperty(required=True)
+
+class Packet(db.Model):
+  stream=db.ReferenceProperty(Stream, required=True)
+  length=db.IntegerProperty(required=True)
+  entropy=db.FloatProperty(required=True)
+  content=db.ListProperty(int)
+  timestamp=db.IntegerProperty(required=True)

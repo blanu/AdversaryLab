@@ -7,55 +7,48 @@ from google.appengine.ext import db
 from rpc import JsonRpcService
 from models import *
 
-def compileIncomingLengths(pcaps):
-  lengths=[0]*1500
-  for pcap in pcaps:
-    if pcap.report and pcap.report.incoming:
-      for x in range(len(pcap.report.incoming.lengths)):
-        lengths[x]=lengths[x]+pcap.report.incoming.lengths[x]
-  return lengths
+def compileLengths(packets, result):
+  lengths=result['lengths']
+  for packet in packets:
+    lengths[packet.length]=lengths[packet.length]+1
+    length=length+packet.length
+  result['lengths']=lengths
+  return result
 
-def compileOutgoingLengths(pcaps):
-  lengths=[0]*1500
-  for pcap in pcaps:
-    if pcap.report and pcap.report.outgoing:
-      for x in range(len(pcap.report.outgoing.lengths)):
-        lengths[x]=lengths[x]+pcap.report.outgoing.lengths[x]
-  return lengths
+def compileContent(packets, result):
+  content=packets['content']
+  for packet in packets:
+    for x in range(len(packet.content)):
+      content[x]=content[x]+packet.content[x]
+  result['content']=content
+  return result
 
-def compileIncomingEntropy(pcaps):
-  entropies=[]
-  for pcap in pcaps:
-    if pcap.report and pcap.report.incoming:
-      entropies=entropies+pcap.report.incoming.entropies
-  entropies=filter(lambda x: x!=0, entropies)
+def calculateEntropy(contents):
+  total=sum(contents)
+
+  u=0
+  for count in contents:
+    if total==0:
+      p=0
+    else:
+      p=float(count)/float(total)
+    if p==0:
+      e=0
+    else:
+      e=-p*math.log(p, 2)
+    u=u+e
+  return u
+
+def compileEntropy(packets, result):
+  entropies=packets['entropy']
+  for packet in packets:
+    entropy=calculateEntropy(packet.content)
+    if entropy!=0:
+      entropies.append(entropy)
   entropies.sort()
-  return entropies
 
-def compileOutgoingEntropy(pcaps):
-  entropies=[]
-  for pcap in pcaps:
-    if pcap.report and pcap.report.outgoing:
-      entropies=entropies+pcap.report.incoming.entropies
-  entropies=filter(lambda x: x!=0, entropies)
-  entropies.sort()
-  return entropies
-
-def compileIncomingContent(pcaps):
-  content=[0]*256
-  for pcap in pcaps:
-    if pcap.report and pcap.report.incoming:
-      for x in range(len(pcap.report.incoming.content)):
-        content[x]=content[x]+pcap.report.incoming.content[x]
-  return content
-
-def compileOutgoingContent(pcaps):
-  content=[0]*256
-  for pcap in pcaps:
-    if pcap.report and pcap.report.outgoing:
-      for x in range(len(pcap.report.outgoing.content)):
-        content[x]=content[x]+pcap.report.outgoing.content[x]
-  return content
+  result['entropy']=entropies
+  return result
 
 def compileIncomingBps(pcaps):
   bps=[]
@@ -245,6 +238,28 @@ class PcapService(JsonRpcService):
   def json_uploadCode(self):
     return blobstore.create_upload_url('/upload')
 
+def compileStream(stream, result):
+  packets=Packet.all().filter("stream =", stream).fetch(100)
+  result=compileLengths(packets, result)
+  result=compileContent(packets, result)
+  result=compileEntropy(packets, result)
+  return result
+
+def emptyResult():
+  return {
+    'filename': pcap.filename,
+    'incoming': {
+      'lengths': [0]*1400,
+      'content': [0]*256,
+      'entropies': []
+    },
+    'outgoing': {
+      'lengths': [0]*1400,
+      'content': [0]*256,
+      'entropies': []
+    }
+  }
+
 class ReportService(JsonRpcService):
   def json_getForPcap(self, filekey):
     logging.info('ACTION(Report): getForPcap')
@@ -254,24 +269,22 @@ class ReportService(JsonRpcService):
       return None
 
     pcap=PcapFile.all().filter("uploader =", user).filter("filekey =", filekey).get()
-    if pcap and pcap.report and pcap.report.incoming and pcap.report.outgoing:
-      return {
-        'filename': pcap.filename,
-        'incoming': {
-          'lengths': map(int, pcap.report.incoming.lengths),
-          'content': map(float, pcap.report.incoming.content),
-          'entropy': sorted(pcap.report.incoming.entropies),
-          'bps': map(int, pcap.report.incoming.bps)
-        },
-        'outgoing': {
-          'lengths': map(int, pcap.report.outgoing.lengths),
-          'content': map(float, pcap.report.incoming.content),
-          'entropy': sorted(pcap.report.incoming.entropies)
-          'bps': map(int, pcap.report.outgoing.bps),
-        }
-      }
-    else:
-      return None
+    result=emptyResult()
+
+    if pcap:
+      conns=Connection.().filter("pcap =", pcap).fetch(100)
+      for conn in conns:
+        streams=Stream.all().filter("connection =", conn).fetch(100)
+        if conn.incomingPort==pcap.port:
+          for stream in streams:
+            result['incoming']=compileStream(stream, result['incoming'])
+        elif conn.outgoingPort==pcap.port:
+          for stream in streams:
+            result['outgoing']=compileStream(stream, result['outgoing'])
+        else:
+          logging.error("Connection has no matching port")
+
+    return result
 
   def json_getForProtocol(self, protocolName):
     logging.info('ACTION(Report): getForProtocol')
@@ -280,25 +293,28 @@ class ReportService(JsonRpcService):
     if not user:
       return None
 
+    result=emptyResult()
+
     protocol=Protocol.all().filter('creator =', user).filter('name =', protocolName).get()
     if protocol:
       pcaps=PcapFile.all().filter('uploader =', user).filter('protocol =', protocol).fetch(100)
       if pcaps:
         logging.info("Found %d pcaps" %(len(pcaps)))
-        return {
-          'incoming': {
-            'lengths': compileIncomingLengths(pcaps),
-            'content': compileIncomingContent(pcaps),
-            'entropy': compileIncomingEntropy(pcaps),
-            'bps': compileIncomingBps(pcaps)
-          },
-          'outgoing': {
-            'lengths': compileOutgoingLengths(pcaps),
-            'content': compileOutgoingContent(pcaps),
-            'entropy': compileOutgoingEntropy(pcaps),
-            'bps': compileOutgoingBps(pcaps)
-          }
-        }
+
+        for pcap in pcaps:
+          conns=Connection.().filter("pcap =", pcap).fetch(100)
+          for conn in conns:
+            streams=Stream.all().filter("connection =", conn).fetch(100)
+            if conn.incomingPort==pcap.port:
+              for stream in streams:
+                result['incoming']=compileStream(stream, result['incoming'])
+            elif conn.outgoingPort==pcap.port:
+              for stream in streams:
+                result['outgoing']=compileStream(stream, result['outgoing'])
+            else:
+              logging.error("Connection has no matching port")
+
+    return result
 
   def json_getForDatasetAndProtocol(self, datasetName, protocolName):
     logging.info('ACTION(Report): getForDataset')
@@ -307,6 +323,8 @@ class ReportService(JsonRpcService):
     if not user:
       return None
 
+    result=emptyResult()
+
     dataset=Dataset.all().filter('creator =', user).filter('name =', datasetName).get()
     if dataset:
       protocol=Protocol.all().filter('creator =', user).filter('name =', protocolName).get()
@@ -314,19 +332,18 @@ class ReportService(JsonRpcService):
         pcaps=PcapFile.all().filter('uploader =', user).filter('dataset =', dataset).filter('protocol =', protocol).fetch(100)
         if pcaps:
           logging.info("Found %d pcaps" %(len(pcaps)))
-          return {
-            'incoming': {
-              'lengths': compileIncomingLengths(pcaps),
-              'content': compileIncomingContent(pcaps),
-              'entropy': compileIncomingEntropy(pcaps),
-              'bps': compileIncomingBps(pcaps)
-            },
-            'outgoing': {
-              'lengths': compileOutgoingLengths(pcaps),
-              'content': compileOutgoingContent(pcaps),
-              'entropy': compileOutgoingEntropy(pcaps),
-              'bps': compileOutgoingBps(pcaps)
-            }
-          }
 
-    return None
+          for pcap in pcaps:
+            conns=Connection.().filter("pcap =", pcap).fetch(100)
+            for conn in conns:
+              streams=Stream.all().filter("connection =", conn).fetch(100)
+              if conn.incomingPort==pcap.port:
+                for stream in streams:
+                  result['incoming']=compileStream(stream, result['incoming'])
+              elif conn.outgoingPort==pcap.port:
+                for stream in streams:
+                  result['outgoing']=compileStream(stream, result['outgoing'])
+              else:
+                logging.error("Connection has no matching port")
+
+    return result
