@@ -10,6 +10,22 @@ from scapy.all import sniff, IPv6, IP, UDP, TCP, rdpcap, wrpcap
 import status
 from models import *
 
+def calculateEntropy(contents):
+  total=sum(contents)
+
+  u=0
+  for count in contents:
+    if total==0:
+      p=0
+    else:
+      p=float(count)/float(total)
+    if p==0:
+      e=0
+    else:
+      e=-p*math.log(p, 2)
+    u=u+e
+  return u
+
 def streamId(packet):
   if 'IP' in packet:
     ip=packet['IP']
@@ -55,34 +71,64 @@ def splitStreams(tracefile, streamdir):
   streams={}
 
 class CaptureStats:
-  def __init__(self, port):
+  def __init__(self, pcap, port):
+    self.pcap=pcap
     self.port=port
 
-    self.streams={}
-
-  def processStream(self, streamfile):
+  def processPcap(self, streamfile):
     packets=rdpcap(streamfile)
 
     for packet in packets:
       logging.debug("packet: "+str(packet))
-      sid=streamId(packet)
+      ports=getPorts(packet)
+      if ports:
+        conn=self.getConnection(ports)
+        stream=Stream.get_or_insert(connection=conn, srcPort=sport, dstPort=dport)
+        self.processPacket(stream, packet)
 
-      if sid:
-        if sid in self.streams.keys():
-          stream=self.streams[sid]
-          stream.processPacket(packet)
-        else:
-          stream=StreamStats(sid, self.port)
-          stream.processPacket(packet)
-          self.streams[sid]=stream
+  def getConnection(self, ports):
+    sport, dport=ports
+    if sport==self.port:
+      conn=self.fetchConnection(dport, self.port)
+    elif dport==self.port:
+      conn=self.fetchConnection(sport, self.port)
+    else:
+      logging.error("Unknown ports %d/%d, expecting %d" % (sport, dport, self.port))
 
-  def compile(self):
-    stats=PcapReport()
-    stats.incoming=self.compileSide(0)
-    stats.outgoing=self.compileSide(1)
-    stats.stream=self.compileStream()
-    stats.save()
-    return stats
+  def fetchConnection(self, incomingPort, outgoingPort):
+    return Connection.get_or_insert(outgoingPort=outgoingPort, incomingPort=incomingPort)
+
+  def processPacket(self, stream, packet):
+    length=0
+    counts=[0]*256
+
+    if 'IP' in packet:
+      try:
+        length=packet['IP'].fields['len']
+      except:
+        logging.error('IP packet has no length')
+        return
+    elif 'IPv6' in packet:
+      try:
+        length=packet['IPv6'].fields['len']
+      except:
+        logging.error('IPv6 packet has no length')
+        return
+    else:
+      logging.error('Non-IP packet: '+str(packet))
+      return
+
+    if 'Raw' in packet:
+      contents=bytes(packet['Raw'])
+      total=len(contents)
+      logging.info("found %d bytes" % (len(contents)))
+
+      for c in contents:
+        x=ord(c)
+        counts[x]=counts[x]+1
+
+    p=Packet(stream=stream, length=length, entropy=calculateEntropy(counts), content=counts, timestamp=int(packet.time))
+    p.save()
 
   def compileSide(self, selector):
     lengths=[0]*1500
@@ -104,21 +150,16 @@ class CaptureStats:
     return stats
 
   def compileStream(self):
-    lengths=[0]*1500
-    entropies=[]
-    counts=[0]*256
-    bps=[]
+    volume=[]
+    direction=[]
+    directedVolume=[]
+
     for sid in self.streams.keys():
       stream=self.streams[sid]
-      ls, e, cs, bs=stream.compile()[selector]
-      for x in range(len(ls)):
-        lengths[x]=lengths[x]+ls[x]
-      if e!=0:
-        entropies.append(e)
-      for x in range(len(cs)):
-        counts[x]=counts[x]+cs[x]
-      bps.append(bs)
-    stats=PcapStats(lengths=lengths, entropies=entropies, content=counts, bps=bps)
+      vs, ds, dvs=stream.compile()[3]
+      volume.append()
+      direction.append()
+    stats=PcapStreamStats(volume=volume, direction=direction, directedVolume=directedVolume)
     stats.save()
     return stats
 
@@ -160,16 +201,16 @@ class StreamStats:
       volume.append(i+o)
       directedVolume.append(i-o)
       if i==0 and o==0:
-        directedVolume.append(0)
+        direction.append(0)
       elif i==0:
-        directedVolume.append(1)
+        direction.append(1)
       elif o==0:
-        directedVolume.append(-1)
+        direction.append(-1)
       else:
         avg=float(i)/float(i+o)
         direction.append((avg-0.5)*2)
 
-    return (volume, direction)
+    return (volume, direction, directedVolume)
 
 class SideStats:
   def __init__(self):
@@ -273,20 +314,10 @@ def generateReport(pcap):
   bf.close()
   f.close()
 
-  report=createReport(pcapfilename, pcap.port)
+  report=createReport(pcap, pcapfilename, pcap.port)
   if report:
-    replaceReport(pcap, report)
     pcap.status=status.complete
     pcap.save()
-
-def replaceReport(pcap, report):
-  if pcap.report:
-    if pcap.report.incoming:
-      pcap.report.incoming.delete()
-    if pcap.report.outgoing:
-      pcap.report.outgoing.delete()
-    pcap.report.delete()
-  pcap.report=report
 
 def pump(inputf, outputf):
   buffsize=4096
@@ -295,7 +326,7 @@ def pump(inputf, outputf):
     outputf.write(data)
     data=inputf.read(buffsize)
 
-def createReport(pcapfilename, port):
-  stats=CaptureStats(port)
-  stats.processStream(pcapfilename)
-  return stats.compile()
+def createReport(pcap, pcapfilename, port):
+  stats=CaptureStats(pcap, port)
+  stats.processPcap(pcapfilename)
+  return True
