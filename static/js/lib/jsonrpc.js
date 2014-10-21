@@ -4,9 +4,9 @@ function jsonrpc(url, methodName, params)
 {
   var id=lastid;
   lastid=lastid+1;
-  
+
   var data=JSON.stringify({'method': methodName, 'params': params, 'id': id});
-  $.post(url, data);  
+  $.post(url, data);
 }
 
 function wrap(callback)
@@ -114,5 +114,9 @@ reports={
   getForProtocol: function(filekey, callback)
   {
     jsonrpcCallback('/api/report', 'getForProtocol', [filekey], callback);
+  },
+  generateModel: function(dataset, protocol)
+  {
+    jsonrpc('/api/report', 'generateModel', [dataset, protocol]);
   }
 };

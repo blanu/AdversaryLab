@@ -11,12 +11,14 @@ function drawChart()
   drawLengthProbs(report);
   drawEntropies(report);
   drawContentProbs(report);
+  drawDurations(report);
+  drawFlow(report);
 }
 
 
 $(document).ready(function() {
   ko.applyBindings(model);
-  
+
   login(model);
 
   google.setOnLoadCallback(function() {
@@ -26,5 +28,5 @@ $(document).ready(function() {
       report=result;
       drawChart();
     });
-  });    
+  });
 });

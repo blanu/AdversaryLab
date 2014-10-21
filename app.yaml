@@ -1,5 +1,4 @@
-application: adversary-lab
-version: 2
+version: 4
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -11,12 +10,12 @@ manual_scaling:
 
 vm_settings:
   machine_type: n1-standard-1
-  apt_get_install: python-scapy build-essential pip
+  apt_get_install: python-scapy build-essential pip python-scipy
 
 handlers:
 - url: /_ah/start
   script: start.app
-  
+
 - url: /favicon\.ico
   static_files: favicon.ico
   upload: favicon\.ico
@@ -25,6 +24,12 @@ handlers:
   script: web.app
 
 - url: /upload
+  script: web.app
+
+- url: /downloadReport
+  script: web.app
+
+- url: /downloadModel
   script: web.app
 
 - url: /static

@@ -9,9 +9,9 @@ from generic import GenericPage
 class Start(GenericPage):
   def execute(self, method, user, req, resp, args):
     logging.info('Start')
-    subprocess.call(['sudo', 'pip', 'install', 'cython'])
-    subprocess.call(['sudo', 'pip', 'install', 'numpy'])
-    subprocess.call(['sudo', 'pip', 'install', 'pystan'])
+#    subprocess.call(['sudo', 'pip', 'install', 'cython'])
+#    subprocess.call(['sudo', 'pip', 'install', 'numpy'])
+#    subprocess.call(['sudo', 'pip', 'install', 'pystan'])
 
 app = webapp.WSGIApplication([
   ('/_ah/start', Start),

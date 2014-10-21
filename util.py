@@ -76,7 +76,7 @@ def newSession(user):
 
 def getDocs(db):
   results={}
-  docs=Document.all().filter('database =', db).fetch(100)
+  docs=Document.all().filter('database =', db).run()
   for rdoc in docs:
     results[rdoc.docid]=loads(rdoc.state)
 
@@ -85,7 +85,7 @@ def getDocs(db):
 
 def listDocs(db):
   results=[]
-  docs=Document.all().filter('database =', db).fetch(100)
+  docs=Document.all().filter('database =', db).run()
   for rdoc in docs:
     results.append(rdoc.docid)
 

@@ -1,6 +1,6 @@
 data {
-  int<lower=1> N;
-  real<lower=0, upper=1440> samples[N];
+  int<lower=1> N; // number of samples
+  real<lower=0> samples[N];
 }
 
 parameters {

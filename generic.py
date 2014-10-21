@@ -99,6 +99,9 @@ class FilePage(GenericPage):
 class JsonRpcService(webapp.RequestHandler, JSONRPC):
     def post(self):
         response, code = self.handleRequest(self.request.body, self.HTTP_POST)
+        self.response.headers['Access-Control-Allow-Origin']='*'
+        self.response.headers['Access-Control-Allow-Headers']='Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With'
+        self.response.headers["Access-Control-Allow-Methods"]='GET, PUT, POST'
         self.response.headers['Content-Type'] = 'application/json'
         self.response.set_status(code)
         self.response.out.write(response)

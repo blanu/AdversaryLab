@@ -3,23 +3,24 @@ import logging
 from google.appengine.api import users
 from google.appengine.api import memcache
 from google.appengine.ext import db
+from google.appengine.ext import deferred
 
 from rpc import JsonRpcService
 from models import *
+from probmodels import *
+from processModel import generateModel
 
-def compileLengths(packets, result):
+def compileLengths(stream, result):
   lengths=result['lengths']
-  for packet in packets:
-    lengths[packet.length]=lengths[packet.length]+1
-    length=length+packet.length
+  for x in range(len(stream.lengths)):
+    lengths[x]=lengths[x]+stream.lengths[x]
   result['lengths']=lengths
   return result
 
 def compileContent(packets, result):
   content=packets['content']
-  for packet in packets:
-    for x in range(len(packet.content)):
-      content[x]=content[x]+packet.content[x]
+  for x in range(len(packet.content)):
+    content[x]=content[x]+packet.content[x]
   result['content']=content
   return result
 
@@ -41,10 +42,9 @@ def calculateEntropy(contents):
 
 def compileEntropy(packets, result):
   entropies=packets['entropy']
-  for packet in packets:
-    entropy=calculateEntropy(packet.content)
-    if entropy!=0:
-      entropies.append(entropy)
+  entropy=calculateEntropy(packet.content)
+  if entropy!=0:
+    entropies.append(entropy)
   entropies.sort()
 
   result['entropy']=entropies
@@ -118,7 +118,7 @@ class ProtocolService(JsonRpcService):
       return None
 
     results=[]
-    prots=Protocol.all().filter("creator =", user).fetch(100)
+    prots=Protocol.all().filter("creator =", user).run()
     for prot in prots:
       results.append(prot.name)
     return results
@@ -162,7 +162,7 @@ class DatasetService(JsonRpcService):
       return None
 
     results=[]
-    prots=Dataset.all().filter("creator =", user).fetch(100)
+    prots=Dataset.all().filter("creator =", user).run()
     for prot in prots:
       results.append(prot.name)
     return results
@@ -190,7 +190,7 @@ class PcapService(JsonRpcService):
       return None
 
     results=[]
-    pcaps=PcapFile.all().filter("uploader =", user).fetch(100)
+    pcaps=PcapFile.all().filter("uploader =", user).run()
     for pcap in pcaps:
       if pcap.dataset:
         dataset=pcap.dataset.name
@@ -239,15 +239,14 @@ class PcapService(JsonRpcService):
     return blobstore.create_upload_url('/upload')
 
 def compileStream(stream, result):
-  packets=Packet.all().filter("stream =", stream).fetch(100)
-  result=compileLengths(packets, result)
-  result=compileContent(packets, result)
-  result=compileEntropy(packets, result)
+  result=compileLengths(stream, result)
+  result=compileContent(stream, result)
+  result=compileEntropy(stream, result)
   return result
 
-def emptyResult():
+def emptyResult(filename):
   return {
-    'filename': pcap.filename,
+    'filename': filename,
     'incoming': {
       'lengths': [0]*1400,
       'content': [0]*256,
@@ -260,90 +259,255 @@ def emptyResult():
     }
   }
 
+class ProtocolStatInfo:
+  def __init__(self):
+    self.sizes=[0]*1500
+    self.content=[0]*256
+    self.durations=[]
+    self.entropies=[]
+    self.flow=[]
+
+def combineProtocol(pcaps):
+  ipstat=ProtocolStatInfo()
+  opstat=ProtocolStatInfo()
+  for pcap in pcaps:
+    for x in range(1500):
+      ipstat.sizes[x]=ipstat.sizes[x]+pcap.incomingStats.lengths[x]
+      opstat.sizes[x]=opstat.sizes[x]+pcap.outgoingStats.lengths[x]
+    for x in range(256):
+      ipstat.content[x]=ipstat.content[x]+pcap.incomingStats.content[x]
+      opstat.content[x]=opstat.content[x]+pcap.outgoingStats.content[x]
+    for d in pcap.incomingStats.durations:
+      ipstat.durations.append(d)
+    for d in pcap.outgoingStats.durations:
+      opstat.durations.append(d)
+    for e in pcap.incomingStats.entropies:
+      ipstat.entropies.append(e)
+    for e in pcap.outgoingStats.entropies:
+      opstat.entropies.append(e)
+    for count in pcap.incomingStats.flow:
+      ipstat.flow.append(count)
+    for count in pcap.outgoingStats.flow:
+      opstat.flow.append(count)
+  return ipstat, opstat
+
 class ReportService(JsonRpcService):
   def json_getForPcap(self, filekey):
-    logging.info('ACTION(Report): getForPcap')
+    sort=False
     user = users.get_current_user()
+    logging.info('ACTION(Report): getForPcap(%s, %s)' % (user, filekey))
 
     if not user:
+      logging.error('User not logged in')
       return None
 
     pcap=PcapFile.all().filter("uploader =", user).filter("filekey =", filekey).get()
-    result=emptyResult()
-
-    if pcap:
-      conns=Connection.().filter("pcap =", pcap).fetch(100)
-      for conn in conns:
-        streams=Stream.all().filter("connection =", conn).fetch(100)
-        if conn.incomingPort==pcap.port:
-          for stream in streams:
-            result['incoming']=compileStream(stream, result['incoming'])
-        elif conn.outgoingPort==pcap.port:
-          for stream in streams:
-            result['outgoing']=compileStream(stream, result['outgoing'])
-        else:
-          logging.error("Connection has no matching port")
-
-    return result
+    if pcap and pcap.incomingStats and pcap.outgoingStats:
+      if sort:
+        return {
+          'filename': pcap.filename,
+          'incoming': {
+            'lengths': sorted(pcap.incomingStats.lengths),
+            'content': sorted(pcap.incomingStats.content),
+            'entropy': sorted(pcap.incomingStats.entropies),
+            'durations': sorted(pcap.incomingStats.durations),
+            'flow': sorted(pcap.incomingStats.flow)
+          },
+          'outgoing': {
+            'lengths': sorted(pcap.outgoingStats.lengths),
+            'content': sorted(pcap.outgoingStats.content),
+            'entropy': sorted(pcap.outgoingStats.entropies),
+            'durations': sorted(pcap.outgoingStats.durations),
+            'flow': sorted(pcap.outgoingStats.flow)
+          }
+        }
+      else:
+        return {
+          'filename': pcap.filename,
+          'incoming': {
+            'lengths': pcap.incomingStats.lengths,
+            'content': pcap.incomingStats.content,
+            'entropy': pcap.incomingStats.entropies,
+            'durations': pcap.incomingStats.durations,
+            'flow': pcap.incomingStats.flow
+          },
+          'outgoing': {
+            'lengths': pcap.outgoingStats.lengths,
+            'content': pcap.outgoingStats.content,
+            'entropy': pcap.outgoingStats.entropies,
+            'durations': pcap.outgoingStats.durations,
+            'flow': pcap.outgoingStats.flow
+          }
+        }
+    else:
+      logging.error('Pcap or stats were null %s %s %s' % (pcap, pcap.incomingStats, pcap.outgoingStats))
+      return None
 
   def json_getForProtocol(self, protocolName):
+    sort=True
     logging.info('ACTION(Report): getForProtocol')
     user = users.get_current_user()
 
     if not user:
       return None
 
-    result=emptyResult()
-
     protocol=Protocol.all().filter('creator =', user).filter('name =', protocolName).get()
     if protocol:
-      pcaps=PcapFile.all().filter('uploader =', user).filter('protocol =', protocol).fetch(100)
+      pcaps=PcapFile.all().filter('uploader =', user).filter('protocol =', protocol).run()
       if pcaps:
-        logging.info("Found %d pcaps" %(len(pcaps)))
-
-        for pcap in pcaps:
-          conns=Connection.().filter("pcap =", pcap).fetch(100)
-          for conn in conns:
-            streams=Stream.all().filter("connection =", conn).fetch(100)
-            if conn.incomingPort==pcap.port:
-              for stream in streams:
-                result['incoming']=compileStream(stream, result['incoming'])
-            elif conn.outgoingPort==pcap.port:
-              for stream in streams:
-                result['outgoing']=compileStream(stream, result['outgoing'])
-            else:
-              logging.error("Connection has no matching port")
-
-    return result
+        ipstat, opstat=combineProtocol(pcaps)
+        if sort:
+          return {
+            'filename': protocolName,
+            'incoming': {
+              'lengths': sorted(ipstat.sizes),
+              'content': sorted(ipstat.content),
+              'entropy': sorted(ipstat.entropies),
+              'durations': sorted(ipstat.durations),
+              'flow': sorted(ipstat.flow)
+            },
+            'outgoing': {
+              'lengths': sorted(opstat.sizes),
+              'content': sorted(opstat.content),
+              'entropy': sorted(opstat.entropies),
+              'durations': sorted(opstat.durations),
+              'flow': sorted(opstat.flow)
+            }
+          }
+        else:
+          return {
+            'filename': protocolName,
+            'incoming': {
+              'lengths': ipstat.sizes,
+              'content': ipstat.content,
+              'entropy': ipstat.entropies,
+              'durations': ipstat.durations,
+              'flow': ipstat.flow
+            },
+            'outgoing': {
+              'lengths': opstat.sizes,
+              'content': opstat.content,
+              'entropy': opstat.entropies,
+              'durations': opstat.durations,
+              'flow': opstat.flow
+            }
+          }
+      else:
+        logging.error('Pcap or stats were null %s %s %s' % (pcap, pcap.incomingStats, pcap.outgoingStats))
+        return None
 
   def json_getForDatasetAndProtocol(self, datasetName, protocolName):
+    sort=False
     logging.info('ACTION(Report): getForDataset')
     user = users.get_current_user()
 
     if not user:
       return None
 
-    result=emptyResult()
+    result=emptyResult(datasetName+' / '+protocolName)
 
     dataset=Dataset.all().filter('creator =', user).filter('name =', datasetName).get()
     if dataset:
       protocol=Protocol.all().filter('creator =', user).filter('name =', protocolName).get()
       if protocol:
-        pcaps=PcapFile.all().filter('uploader =', user).filter('dataset =', dataset).filter('protocol =', protocol).fetch(100)
+        pcaps=PcapFile.all().filter('uploader =', user).filter('dataset =', dataset).filter('protocol =', protocol).run()
         if pcaps:
-          logging.info("Found %d pcaps" %(len(pcaps)))
+          ipstat, opstat=combineProtocol(pcaps)
+          if sort:
+            return {
+              'filename': datasetName +" / "+protocolName,
+              'incoming': {
+                'lengths': sorted(ipstat.sizes),
+                'content': sorted(ipstat.content),
+                'entropy': sorted(ipstat.entropies),
+                'durations': sorted(ipstat.durations),
+                'flow': sorted(ipstat.flow)
+              },
+              'outgoing': {
+                'lengths': sorted(opstat.sizes),
+                'content': sorted(opstat.content),
+                'entropy': sorted(opstat.entropies),
+                'durations': sorted(opstat.durations),
+                'flow': sorted(opstat.flow)
+              }
+            }
+          else:
+            return {
+              'filename': protocolName,
+              'incoming': {
+                'lengths': ipstat.sizes,
+                'content': ipstat.content,
+                'entropy': ipstat.entropies,
+                'durations': ipstat.durations,
+                'flow': ipstat.flow
+              },
+              'outgoing': {
+                'lengths': opstat.sizes,
+                'content': opstat.content,
+                'entropy': opstat.entropies,
+                'durations': opstat.durations,
+                'flow': opstat.flow
+              }
+            }
+        else:
+          logging.error('Pcap or stats were null %s %s %s' % (pcap, pcap.incomingStats, pcap.outgoingStats))
+          return None
 
-          for pcap in pcaps:
-            conns=Connection.().filter("pcap =", pcap).fetch(100)
-            for conn in conns:
-              streams=Stream.all().filter("connection =", conn).fetch(100)
-              if conn.incomingPort==pcap.port:
-                for stream in streams:
-                  result['incoming']=compileStream(stream, result['incoming'])
-              elif conn.outgoingPort==pcap.port:
-                for stream in streams:
-                  result['outgoing']=compileStream(stream, result['outgoing'])
-              else:
-                logging.error("Connection has no matching port")
+  def json_generateModel(self, datasetName, protocolName):
+    logging.info('ACTION(Report): generateModel')
+    user = users.get_current_user()
 
-    return result
+    if not user:
+      return None
+
+    result=None
+
+    dataset=Dataset.all().filter('creator =', user).filter('name =', datasetName).get()
+    if dataset:
+      protocol=Protocol.all().filter('creator =', user).filter('name =', protocolName).get()
+      if protocol:
+        pcaps=PcapFile.all().filter('uploader =', user).filter('dataset =', dataset).filter('protocol =', protocol).run()
+        if pcaps:
+          ipstat, opstat=combineProtocol(pcaps)
+          deferred.defer(generateModel, user, protocol, dataset, ipstat, opstat)
+          return True
+
+    return False
+
+  def json_getModel(self, datasetName, protocolName):
+    logging.info('ACTION(Report): getModel')
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    result=None
+
+    dataset=Dataset.all().filter('creator =', user).filter('name =', datasetName).get()
+    if dataset:
+      protocol=Protocol.all().filter('creator =', user).filter('name =', protocolName).get()
+      if protocol:
+        incomingModel=ProtocolModel.all().filter('dataset =', dataset).filter('protocol =', protocol).filter('outgoing', False).get()
+        outgoingModel=ProtocolModel.all().filter('dataset =', dataset).filter('protocol =', protocol).filter('outgoing', True).get()
+        logging.debug('Models')
+        logging.debug(incomingModel)
+        logging.debug(outgoingModel)
+        if incomingModel and outgoingModel:
+          return {
+            'incoming': {
+              'length': [incomingModel.length.distribution.mean, incomingModel.length.distribution.sd],
+              'entropy': [incomingModel.entropy.distribution.mean, incomingModel.entropy.distribution.sd],
+              'flow': incomingModel.flow.distribution.parameter,
+              'content': incomingModel.content.distribution.distribution,
+              'duration': incomingModel.duration.distribution.parameter
+            },
+            'outgoing': {
+              'length': [outgoingModel.length.distribution.mean, outgoingModel.length.distribution.sd],
+              'entropy': [outgoingModel.entropy.distribution.mean, outgoingModel.entropy.distribution.sd],
+              'flow': outgoingModel.flow.distribution.parameter,
+              'content': outgoingModel.content.distribution.distribution,
+              'duration': outgoingModel.duration.distribution.parameter
+            }
+          }
+
+    return False

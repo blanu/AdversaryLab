@@ -14,7 +14,9 @@ app = webapp.WSGIApplication([
   ('/login', Login),
   ('/upload', Upload),
   ('/download', Download),
+  ('/downloadReport', DownloadReport),
   ('/uploadReport', UploadReport),
+  ('/downloadModel', DownloadModel),
 
   ('/api/user', UserService),
   ('/api/protocol', ProtocolService),

@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Report on <span class="reportName" data-bind="text: dataset"></span> | AdversaryLab</title>
+    <title>Report on <span class="reportName" data-bind="text: reportName"></span> | AdversaryLab</title>
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
     <link href="/css/polymer.css" rel="stylesheet" type="text/css"/>
     <link href="/css/adLab.css" rel="stylesheet" type="text/css"/>
@@ -9,25 +9,28 @@
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load('visualization', '1.0', {'packages':['corechart']});
-    </script>    
+    </script>
   </head>
   <body fullbleed unresolved touch-action="auto">
     <core-scaffold>
-      <core-header-panel navigation flex mode="seamed">        
+      <core-header-panel navigation flex mode="seamed">
         <core-toolbar>Menu</core-toolbar>
         <core-menu theme="core-light-theme">
-  	      <core-item label="Upload Pcaps"><a href="/dashboard"></a></core-item>
+  	      <core-item label="Upload Pcaps"><a href="/"></a></core-item>
   	      <core-item label="Manage Datasets"><a href="/manageDatasets"></a></core-item>
   	      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
-  	      <core-item label="Organize Pcaps"></core-item>
+  	      <core-item label="Organize Pcaps"><a href="/organize"></a></core-item>
         </core-menu>
-      </core-header-panel>  
-	  
-      <div tool>Report on <span class="reportName" data-bind="text: dataset"></span></div>
+      </core-header-panel>
+
+      <div tool>Report on <span class="reportName" data-bind="text: reportName"></span></div>
       <div id="content">
+        <div id="buttons">
+          <paper-button id="generateModel" label="Generate Model" raisedButton></paper-button>
+        </div>
         <p>
           <h2>Length Report</h2>
-          <div class="graph">      
+          <div class="graph">
             <p>
               <div id="incomingLengthProbs" style="padding: 4px;"></div>
               <div id="outgoingLengthProbs" style="padding: 4px;"></div>
@@ -42,7 +45,34 @@
               <div id="outgoingEntropy" style="padding: 4px;"></div>
             </p>
           </div>
-        </p>  
+        </p>
+        <p>
+          <h2>Content Report</h2>
+          <div class="smallText2">
+            <p>
+              <div id="incomingContentProbs" style="padding: 4px;"></div>
+              <div id="outgoingContentProbs" style="padding: 4px;"></div>
+            </p>
+          </div>
+        </p>
+        <p>
+          <h2>Duration Report</h2>
+          <div class="smallText2">
+            <p>
+              <div id="incomingDurations" style="padding: 4px;"></div>
+              <div id="outgoingDurations" style="padding: 4px;"></div>
+            </p>
+          </div>
+        </p>
+        <p>
+          <h2>Flow Report</h2>
+          <div class="smallText2">
+            <p>
+              <div id="incomingFlow" style="padding: 4px;"></div>
+              <div id="outgoingFlow" style="padding: 4px;"></div>
+            </p>
+          </div>
+        </p>
   	  </div>
     </core-scaffold>
 
@@ -56,11 +86,12 @@
     <link rel="import" href="/js/lib/polymer/components/core-icons/core-icons.html">
     <link rel="import" href="/js/lib/polymer/components/paper-tabs/paper-tabs.html">
     <link rel="import" href="/js/lib/polymer/components/paper-input/paper-input.html">
-  
+    <link rel="import" href="/js/lib/polymer/components/paper-button/paper-button.html">
+
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
     <script type="text/javascript" src="/js/lib/knockout.js"></script>
-    <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>  
+    <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>
     <script type="text/javascript" src="/js/lib/debug.js"></script>
     <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
     <script type="text/javascript" src="/js/login.js"></script>

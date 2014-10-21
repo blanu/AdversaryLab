@@ -27,6 +27,7 @@ from generic import TemplatePage, GenericPage, FilePage
 from models import *
 from util import *
 from process import *
+from api import ReportService
 
 class Index(TemplatePage):
   def processContext(self, method, user, req, resp, args, context):
@@ -60,15 +61,15 @@ class DashboardIndex(TemplatePage):
     context['userid']=user.email().lower()
     context['uploadUrl']=blobstore.create_upload_url('/upload')
 
-    pcaps=PcapFile.all().filter("uploader =", user).order('status').fetch(100)
+    pcaps=PcapFile.all().filter("uploader =", user).order('status').run()
     context['pcaps']=pcaps
     logging.info('pcaps: '+str(pcaps))
 
-    prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+    prots=Protocol.all().filter("creator =", user).order('name').run()
     context['prots']=prots
     logging.info('prots: '+str(prots))
 
-    datasets=Dataset.all().filter("creator =", user).order('name').fetch(100)
+    datasets=Dataset.all().filter("creator =", user).order('name').run()
     context['datasets']=datasets
     logging.info('datasets: '+str(datasets))
 
@@ -81,15 +82,15 @@ class ManageDatasets(TemplatePage):
     context['userid']=user.email().lower()
     context['uploadUrl']=blobstore.create_upload_url('/upload')
 
-    pcaps=PcapFile.all().filter("uploader =", user).order('status').fetch(100)
+    pcaps=PcapFile.all().filter("uploader =", user).order('status').run()
     context['pcaps']=pcaps
     logging.info('pcaps: '+str(pcaps))
 
-    prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+    prots=Protocol.all().filter("creator =", user).order('name').run()
     context['prots']=prots
     logging.info('prots: '+str(prots))
 
-    datasets=Dataset.all().filter("creator =", user).order('name').fetch(100)
+    datasets=Dataset.all().filter("creator =", user).order('name').run()
     context['datasets']=datasets
     logging.info('datasets: '+str(datasets))
 
@@ -102,15 +103,15 @@ class ManageProtocols(TemplatePage):
     context['userid']=user.email().lower()
     context['uploadUrl']=blobstore.create_upload_url('/upload')
 
-    pcaps=PcapFile.all().filter("uploader =", user).order('status').fetch(100)
+    pcaps=PcapFile.all().filter("uploader =", user).order('status').run()
     context['pcaps']=pcaps
     logging.info('pcaps: '+str(pcaps))
 
-    prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+    prots=Protocol.all().filter("creator =", user).order('name').run()
     context['prots']=prots
     logging.info('prots: '+str(prots))
 
-    datasets=Dataset.all().filter("creator =", user).order('name').fetch(100)
+    datasets=Dataset.all().filter("creator =", user).order('name').run()
     context['datasets']=datasets
     logging.info('datasets: '+str(datasets))
 
@@ -123,15 +124,15 @@ class Organize(TemplatePage):
     context['userid']=user.email().lower()
     context['uploadUrl']=blobstore.create_upload_url('/upload')
 
-    pcaps=PcapFile.all().filter("uploader =", user).order('status').fetch(100)
+    pcaps=PcapFile.all().filter("uploader =", user).order('status').run()
     context['pcaps']=pcaps
     logging.info('pcaps: '+str(pcaps))
 
-    prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+    prots=Protocol.all().filter("creator =", user).order('name').run()
     context['prots']=prots
     logging.info('prots: '+str(prots))
 
-    datasets=Dataset.all().filter("creator =", user).order('name').fetch(100)
+    datasets=Dataset.all().filter("creator =", user).order('name').run()
     context['datasets']=datasets
     logging.info('datasets: '+str(datasets))
 
@@ -200,6 +201,34 @@ class Download(blobstore_handlers.BlobstoreDownloadHandler):
       blob_info = blobstore.BlobInfo.get(resource)
       self.send_blob(blob_info)
 
+class DownloadReport(JsonPage):
+  def processJson(self, method, user, req, resp, args, obj):
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    protocolName=self.request.get('protocol')
+    datasetName=self.request.get('dataset')
+
+    service=ReportService()
+    result=service.json_getForDatasetAndProtocol(datasetName, protocolName)
+    return result
+
+class DownloadModel(JsonPage):
+  def processJson(self, method, user, req, resp, args, obj):
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    protocolName=self.request.get('protocol')
+    datasetName=self.request.get('dataset')
+
+    service=ReportService()
+    result=service.json_getModel(datasetName, protocolName)
+    return result
+
 class Report(TemplatePage):
   def processContext(self, method, user, req, resp, args, context):
     filekey=self.request.get('filekey')
@@ -237,7 +266,7 @@ class ProtocolReport(TemplatePage):
     if protocol:
       context['protocol']=protocol
       logging.info('protocol: '+str(protocol))
-      pcaps=PcapFile.all().filter('protocol =', protocol).fetch(100)
+      pcaps=PcapFile.all().filter('protocol =', protocol).run()
       if pcaps:
         context['report']=dumps({
           'incoming': {
@@ -302,11 +331,11 @@ class DatasetIndex(TemplatePage):
       context['dataset']=dataset
       logging.info('dataset: '+str(dataset))
 
-      pcaps=PcapFile.all().filter("uploader =", user).filter('dataset =', dataset).order('filename').fetch(100)
+      pcaps=PcapFile.all().filter("uploader =", user).filter('dataset =', dataset).order('filename').run()
       context['pcaps']=pcaps
       logging.info('pcaps: '+str(pcaps))
 
-      prots=Protocol.all().filter("creator =", user).order('name').fetch(100)
+      prots=Protocol.all().filter("creator =", user).order('name').run()
       context['prots']=prots
       logging.info('prots: '+str(prots))
 
@@ -333,7 +362,7 @@ class DatasetReport(TemplatePage):
         context['dataset']=dataset
         logging.info('dataset: '+str(dataset))
 
-        pcaps=PcapFile.all().filter("uploader =", user).filter('protocol =', protocol).filter('dataset =', dataset).fetch(100)
+        pcaps=PcapFile.all().filter("uploader =", user).filter('protocol =', protocol).filter('dataset =', dataset).run()
         if pcaps:
           logging.info("Found %d pcaps" %(len(pcaps)))
           context['report']=dumps({

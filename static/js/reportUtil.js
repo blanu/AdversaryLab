@@ -5,7 +5,7 @@ function expand(lab, arr)
   {
     results.push([x, arr[x]]);
   }
-  
+
   return results;
 }
 
@@ -16,7 +16,7 @@ function label(lab, arr)
   {
     results.push([x, arr[x]]);
   }
-  
+
   return results;
 }
 
@@ -28,22 +28,22 @@ function normalize(lab, arr)
   {
     total=total+arr[x]
   }
-  
+
   for(var x=0; x<arr.length; x++)
   {
     results.push([x, arr[x]/total]);
   }
-  
+
   log('normalized');
   log(results);
-  
-  return results;  
+
+  return results;
 }
 
 function drawLengthCounts(report)
 {
     var data = google.visualization.arrayToDataTable(expand(["Packet Length", "Count"], report['incoming']['lengths']));
-    
+
     var options = {
       'title':'Incoming Stream: Count of Packets with a Given Length',
       'width':400, 'height':300,
@@ -57,9 +57,9 @@ function drawLengthCounts(report)
     chart.draw(data, options);
 
     /* ------------- */
-    
+
     data = google.visualization.arrayToDataTable(expand(["Packet Length", "Count"], report['outgoing']['lengths']));
-    
+
     options = {
       'title':'Outgoing Stream: Count of Packets with a Given Length',
       'width':400, 'height':300,
@@ -70,13 +70,13 @@ function drawLengthCounts(report)
     };
 
     chart = new google.visualization.BarChart(document.getElementById('outgoingLengthCount'));
-    chart.draw(data, options);    
+    chart.draw(data, options);
 }
 
 function drawLengthProbs(report)
 {
     var data = google.visualization.arrayToDataTable(normalize(["Packet Length", "Probability"], report['incoming']['lengths']));
-    
+
     var options = {
       'title':'Incoming Stream: Probability of Packets with a Given Length',
       'width':400, 'height':300,
@@ -85,7 +85,7 @@ function drawLengthProbs(report)
         'position': 'none'
       },
       'vAxis': {
-        'maxValue': 1
+        'maxValue': 0.5
       }
     };
 
@@ -93,9 +93,9 @@ function drawLengthProbs(report)
     chart.draw(data, options);
 
     /* ------------- */
-    
+
     data = google.visualization.arrayToDataTable(normalize(["Packet Length", "Probability"], report['outgoing']['lengths']));
-    
+
     options = {
       'title':'Outgoing Stream: Probability of Packets with a Given Length',
       'width':400, 'height':300,
@@ -104,18 +104,18 @@ function drawLengthProbs(report)
         'position': 'none'
       },
       'vAxis': {
-        'maxValue': 1
+        'maxValue': 0.5
       }
     };
 
     chart = new google.visualization.BarChart(document.getElementById('outgoingLengthProbs'));
-    chart.draw(data, options);    
+    chart.draw(data, options);
 }
 
 function drawEntropies(report)
 {
     var data = google.visualization.arrayToDataTable(label(["Dataset", 'Entropy'], report.incoming.entropy));
-    
+
     var options = {
       'title':'Incoming Stream: Entropies',
       'width':400, 'height':300,
@@ -130,11 +130,11 @@ function drawEntropies(report)
 
     var chart = new google.visualization.BarChart(document.getElementById('incomingEntropy'));
     chart.draw(data, options);
-    
+
     /* ------------- */
 
     data = google.visualization.arrayToDataTable(label(["Dataset", 'Entropy'], report.outgoing.entropy));
-    
+
     options = {
       'title':'Outgoing Stream: Entropies',
       'width':400, 'height':300,
@@ -151,10 +151,49 @@ function drawEntropies(report)
     chart.draw(data, options);
 }
 
+function drawDurations(report)
+{
+    var data = google.visualization.arrayToDataTable(label(["Dataset", 'Duration'], report.incoming.durations));
+
+    var options = {
+      'title':'Incoming Stream: Durations',
+      'width':400, 'height':300,
+      'orientation': 'horizontal',
+      'legend': {
+        'position': 'none'
+      },
+      'vAxis': {
+        'maxValue': 8
+      }
+    };
+
+    var chart = new google.visualization.BarChart(document.getElementById('incomingDurations'));
+    chart.draw(data, options);
+
+    /* ------------- */
+
+    data = google.visualization.arrayToDataTable(label(["Dataset", 'Duration'], report.outgoing.durations));
+
+    options = {
+      'title':'Outgoing Stream: Durations',
+      'width':400, 'height':300,
+      'orientation': 'horizontal',
+      'legend': {
+        'position': 'none'
+      },
+      'vAxis': {
+        'maxValue': 8
+      }
+    };
+
+    chart = new google.visualization.BarChart(document.getElementById('outgoingDurations'));
+    chart.draw(data, options);
+}
+
 function drawContentProbs(report)
 {
     var data = google.visualization.arrayToDataTable(normalize(["Byte Value", "Probability"], report['incoming']['content']));
-    
+
     var options = {
       'title':'Incoming Stream: Probability of Byte with a Given Value',
       'width':400, 'height':300,
@@ -163,7 +202,7 @@ function drawContentProbs(report)
         'position': 'none'
       },
       'vAxis': {
-        'maxValue': 0.05
+        'maxValue': 0.1
       }
     };
 
@@ -171,9 +210,9 @@ function drawContentProbs(report)
     chart.draw(data, options);
 
     /* ------------- */
-    
+
     data = google.visualization.arrayToDataTable(normalize(["Byte Value", "Probability"], report['outgoing']['content']));
-    
+
     options = {
       'title':'Outgoing Stream: Probability of Byte with a Given Value',
       'width':400, 'height':300,
@@ -182,10 +221,47 @@ function drawContentProbs(report)
         'position': 'none'
       },
       'vAxis': {
-        'maxValue': 0.05
+        'maxValue': 0.1
       }
     };
 
     chart = new google.visualization.BarChart(document.getElementById('outgoingContentProbs'));
-    chart.draw(data, options);    
+    chart.draw(data, options);
+}
+
+function drawFlow(report)
+{
+    var data = google.visualization.arrayToDataTable(label(["Dataset", 'Packets Per Second'], report.incoming.flow));
+
+    var options = {
+      'title':'Incoming Stream: Packets Per Second',
+      'width':400, 'height':300,
+      'orientation': 'horizontal',
+      'legend': {
+        'position': 'none'
+      },
+      'vAxis': {
+      }
+    };
+
+    var chart = new google.visualization.BarChart(document.getElementById('incomingFlow'));
+    chart.draw(data, options);
+
+    /* ------------- */
+
+    data = google.visualization.arrayToDataTable(label(["Dataset", 'Packets Per Second'], report.outgoing.flow));
+
+    options = {
+      'title':'Outgoing Stream: Packets Per Second',
+      'width':400, 'height':300,
+      'orientation': 'horizontal',
+      'legend': {
+        'position': 'none'
+      },
+      'vAxis': {
+      }
+    };
+
+    chart = new google.visualization.BarChart(document.getElementById('outgoingFlow'));
+    chart.draw(data, options);
 }
