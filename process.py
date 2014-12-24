@@ -66,6 +66,24 @@ def getPorts(packet):
       return (sport, dport)
   return None
 
+def getSortedPorts(packet):
+  if 'IP' in packet or 'IPv6' in packet:
+    if 'UDP' in packet:
+      dport=packet['UDP'].fields['dport']
+      sport=packet['UDP'].fields['sport']
+      if sport<dport:
+        return (sport, dport)
+      else:
+        return (dport, sport)
+    elif 'TCP' in packet:
+      dport=packet['TCP'].fields['dport']
+      sport=packet['TCP'].fields['sport']
+      if sport<dport:
+        return (sport, dport)
+      else:
+        return (dport, sport)
+  return None
+
 # generator
 def getTimestamps(packets):
   for packet in packets:
@@ -91,8 +109,20 @@ def packetsPerSecond(offsets):
     current=offset
 
 def calculateFlow(packets):
-  base=int(packets[0].time)
-  return packetsPerSecond(absoluteToRelative(base, getTimestamps(packets)))
+  if packets and len(packets)>0:
+    base=int(packets[0].time)
+    return packetsPerSecond(absoluteToRelative(base, getTimestamps(packets)))
+  else:
+    return []
+
+def calculateDuration(timestamps):
+  if len(timestamps)<2:
+    return 0
+  else:
+    l=sorted(timestamps)
+    first=timestamps[0]
+    last=timestamps[-1]
+    return last-first
 
 class StreamStatInfo:
   def __init__(self):
@@ -100,14 +130,27 @@ class StreamStatInfo:
     self.content=[0]*256
     self.timestamps=[]
     self.flow=[]
+    self.entropy=0
+    self.duration=0
 
 class PcapStatInfo:
   def __init__(self):
-    self.sizes=[0]*1500
-    self.content=[0]*256
-    self.durations=[]
-    self.entropies=[]
-    self.flow=[]
+    self.duration=[]
+    self.isizes=[0]*1500
+    self.icontent=[0]*256
+    self.ientropy=[]
+    self.iflow=[]
+    self.osizes=[0]*1500
+    self.ocontent=[0]*256
+    self.oentropy=[]
+    self.oflow=[]
+
+def getFirstPacketContents(packet):
+  bs=bytes(packet.load)
+  l=[0]*len(bs)
+  for x in range(len(bs)):
+    l[x]=ord(bs[x])
+  return l
 
 class CaptureStats:
   def __init__(self, pcap, port):
@@ -120,48 +163,51 @@ class CaptureStats:
     self.splitStreams(streamfile)
     for key in self.streams:
       packets=self.streams[key]
-      info=self.data[key]
-      info.flow=calculateFlow(packets)
+      infos=self.data[key]
+      infos[0].flow=calculateFlow(packets[0])
+      infos[1].flow=calculateFlow(packets[1])
 
-      for packet in packets:
-        self.processPacket(key, packet)
+      for index in [0,1]:
+        side=packets[index]
+        for packet in side:
+          self.processPacket(key, index, packet)
 
-    ipstat, opstat=self.combineStreams()
-
-    logging.info('Writing pcap stats')
-    istats=Stats(lengths=ipstat.sizes, content=ipstat.content, durations=ipstat.durations, entropies=ipstat.entropies, flow=ipstat.flow)
-    istats.save()
-    ostats=Stats(lengths=opstat.sizes, content=opstat.content, durations=opstat.durations, entropies=opstat.entropies, flow=opstat.flow)
-    ostats.save()
-    self.pcap.incomingStats=istats
-    self.pcap.outgoingStats=ostats
-    self.pcap.save()
+      self.combineStreams()
 
   def splitStreams(self, tracefile):
-    packets=rdpcap(tracefile)
+    try:
+      packets=rdpcap(tracefile)
+    except:
+      logging.error('Error reading pcap file '+tracefile)
+      return
     for packet in packets:
       if ('IP' in packet or 'IPv6' in packet) and ('TCP' in packet or 'UDP' in packet) and 'Raw' in packet and len(packet.load)>0:
         ports=getPorts(packet)
+        if self.port==ports[0]:
+          portIndex=0
+        elif self.port==ports[1]:
+          portIndex=1
+        else:
+          #logging.error('Unknown port')
+          continue
+        sports=getSortedPorts(packet)
         if ports:
-          key=str(ports[0])+":"+str(ports[1])
-          if key in self.streams:
-            self.streams[key].append(packet)
-          else:
-            self.streams[key]=[packet]
-          if not key in self.data:
-            self.data[key]=StreamStatInfo()
+          skey=str(sports[0])+":"+str(sports[1])
+          if not (skey in self.streams):
+            self.streams[skey]=[[], []]
+          self.streams[skey][portIndex].append(packet)
+          if not skey in self.data:
+            self.data[skey]=[StreamStatInfo(), StreamStatInfo()]
 
   def getFirstPacketContents(self, packet):
     bs=bytes(packet.load)
-    logging.debug('First packet:')
-    logging.debug(packet.load)
     l=[0]*len(bs)
     for x in range(len(bs)):
       l[x]=ord(bs[x])
     return l
 
-  def processPacket(self, stream, packet):
-    info=self.data[stream]
+  def processPacket(self, stream, portIndex, packet):
+    info=self.data[stream][portIndex]
     sz=info.sizes
 
     contents=bytes(packet.load)
@@ -179,34 +225,42 @@ class CaptureStats:
     info.timestamps.append(float(packet.time))
 
     info.sizes=sz
-    self.data[stream]=info
+    self.data[stream][portIndex]=info
 
   def combineStreams(self):
-    ipstat=PcapStatInfo()
-    opstat=PcapStatInfo()
+    pstats=PcapStatInfo()
     for key in self.data:
       info=self.data[key]
-      srcPort, dstPort=map(int,key.split(':'))
-      if srcPort==self.port:
-        pstat=opstat
-      elif dstPort==self.port:
-        pstat=ipstat
-      else:
-        logging.error('Unknown port %d:%d' % (srcPort, dstPort))
-        continue
-      for x in range(len(info.sizes)):
-        pstat.sizes[x]=pstat.sizes[x]+info.sizes[x]
-      for x in range(len(info.content)):
-        pstat.content[x]=pstat.content[x]+info.content[x]
-      if len(info.timestamps)>1:
-        pstat.durations.append(info.timestamps[-1]-info.timestamps[0])
-      e=calculateEntropy(info.content)
-      if e>0:
-        pstat.entropies.append(e)
-      for count in info.flow:
-        pstat.flow.append(count)
-    return ipstat, opstat
+      info[0].entropy=calculateEntropy(info[0].content)
+      info[1].entropy=calculateEntropy(info[1].content)
+      info[0].duration=calculateDuration(info[0].timestamps+info[1].timestamps)
+      info[1].duration=info[0].duration
+      istats=Stats(parent=self.pcap, lengths=info[0].sizes, content=info[0].content, entropy=info[0].entropy, flow=list(info[0].flow))
+      istats.save()
+      ostats=Stats(parent=self.pcap, lengths=info[1].sizes, content=info[1].content, entropy=info[1].entropy, flow=list(info[1].flow))
+      ostats.save()
+      conn=Connection(parent=self.pcap, pcap=self.pcap, portsId=key, duration=float(info[0].duration), incomingStats=istats, outgoingStats=ostats)
+      conn.save()
 
+      pstats.duration.append(info[0].duration)
+
+      pstats.isizes=pstats.isizes+info[0].sizes
+      pstats.icontent=pstats.icontent+info[0].content
+      pstats.ientropy.append(info[0].entropy)
+      pstats.iflow=pstats.iflow+info[0].flow
+
+      pstats.osizes=pstats.osizes+info[1].sizes
+      pstats.ocontent=pstats.ocontent+info[1].content
+      pstats.oentropy.append(info[1].entropy)
+      pstats.oflow=pstats.oflow+info[1].flow
+
+    pistats=DirectionalSummaryStats(parent=pcap, lengths=pstats.isizes, content=pstats.icontent, entropy=pstats.ientropy, flow=pstats.iflow)
+    pistats.save()
+    postats=DirectionalSummaryStats(parent=pcap, lengths=pstats.osizes, content=pstats.ocontent, entropy=pstats.oentropy, flow=pstats.oflow)
+    postats.save()
+    pcapStats=PcapStats(parent=pcap, pcap=pcap, duration=pstats.duration, incomingStats=pistats, outgoingStats=postats)
+    pcapStats.save()
+      
 def processPcap(blobkey):
   blob_info=blobstore.get(blobkey)
   logging.info("processing "+blob_info.filename)

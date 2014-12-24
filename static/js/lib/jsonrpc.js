@@ -83,6 +83,37 @@ dataset={
   }
 };
 
+adversary={
+  add: function(name)
+  {
+    jsonrpc('/api/adversary', 'add', [name]);
+  },
+  list: function(callback)
+  {
+    jsonrpcCallback('/api/adversary', 'list', [], callback);
+  },
+  pcaps: function(name, callback)
+  {
+    jsonrpcCallback('/api/adversary', 'pcaps', [name], callback);
+  },
+  sort: function(name, filename, training, label, callback)
+  {
+    jsonrpcCallback('/api/adversary', 'sort', [name, filename, training, label], callback);
+  },
+  unsort: function(name, filename, callback)
+  {
+    jsonrpcCallback('/api/adversary', 'unsort', [name, filename], callback);
+  },
+  train: function(name)
+  {
+    jsonrpc('/api/adversary', 'train', [name]);
+  },
+  test: function(name)
+  {
+    jsonrpc('/api/adversary', 'test', [name]);
+  }
+};
+
 pcap={
   setProtocol: function(filekey, name)
   {
@@ -118,5 +149,13 @@ reports={
   generateModel: function(dataset, protocol)
   {
     jsonrpc('/api/report', 'generateModel', [dataset, protocol]);
+  },
+  rerun: function()
+  {
+    jsonrpc('/api/report', 'rerun', []);
+  },
+  rerunPcap: function(filekey)
+  {
+    jsonrpc('/api/report', 'rerunPcap', [filekey]);
   }
 };

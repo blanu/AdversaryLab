@@ -1,0 +1,16 @@
+<link rel="import" href="/js/lib/polymer/components/polymer/polymer.html">
+<link rel="import" href="/js/lib/polymer/components/core-menu/core-menu.html">
+<link rel="import" href="/js/lib/polymer/components/core-item/core-item.html">
+
+<polymer-element name="adversary-lab-menu" attributes="selected">
+  <template>
+    <core-menu theme="core-light-theme">
+      <core-item label="Upload Pcaps"><a href="/"></a></core-item>
+      <core-item label="Manage Datasets"><a href="/manageDatasets"></a></core-item>
+      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
+      <core-item label="Organize Pcaps"><a href="/organize"></a></core-item>
+      <core-item label="Adversaries"><a href="/adversaries"></a></core-item>
+    </core-menu>
+  </template>
+  <script src="/js/lib/adversary-lab/components/adversary-lab-menu/adversary-lab-menu.js"></script>
+</polymer-element>

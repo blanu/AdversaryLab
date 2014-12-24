@@ -9,7 +9,7 @@
   </head>
   <body fullbleed unresolved touch-action="auto">
     <core-scaffold>
-      <core-header-panel navigation flex mode="seamed">        
+      <core-header-panel navigation flex mode="seamed">
         <core-toolbar><img src="/static/images/A.png" width="27" height="40">  Adversary Lab  </core-toolbar>
         <core-menu theme="core-light-theme" selected="1">
   	      <core-item label="Upload Pcaps"><a href="/"></a></core-item>
@@ -17,21 +17,21 @@
   	      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
   	      <core-item label="Organize Pcaps"><a href="/organize"></a></core-item>
         </core-menu>
-      </core-header-panel>  
-  
+      </core-header-panel>
+
       <div tool>Manage Datasets</div>
 	    <div id="content">
         <table>
           <tbody id="datasets" data-bind="foreach: datasets">
             <tr>
               <td data-bind="text: name"></td>
-              <td><a class="reportLink" data-bind="attr {filekey: name}">View Report</a></td>              
+              <td><a class="reportLink" data-bind="attr {filekey: name}">View Report</a></td>
             </tr>
           </tbody>
         </table>
-  
+
         <paper-button id="addDataset" label="Add dataset" raisedButton></paper-button>
-      </div>  
+      </div>
 	    </div>
     </core-scaffold>
   </body>
@@ -51,7 +51,7 @@
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
   <script type="text/javascript" src="/js/lib/knockout.js"></script>
-  <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>  
+  <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>
   <script type="text/javascript" src="/js/lib/debug.js"></script>
   <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
   <script type="text/javascript" src="/js/login.js"></script>

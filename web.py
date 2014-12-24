@@ -22,7 +22,8 @@ app = webapp.WSGIApplication([
   ('/api/protocol', ProtocolService),
   ('/api/dataset', DatasetService),
   ('/api/pcap', PcapService),
-  ('/api/report', ReportService)
+  ('/api/report', ReportService),
+  ('/api/adversary', AdversaryService)
 ], debug=True)
 
 def main():

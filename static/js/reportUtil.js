@@ -153,41 +153,57 @@ function drawEntropies(report)
 
 function drawDurations(report)
 {
-    var data = google.visualization.arrayToDataTable(label(["Dataset", 'Duration'], report.incoming.durations));
+    log('drawDurations');
+    log(report.incoming.durations);
+    if(report.incoming.durations.length==0)
+    {
+      $('#incomingDurations').append('Insufficient incoming stream duration data available.');
+    }
+    else
+    {
+      var data = google.visualization.arrayToDataTable(label(["Dataset", 'Duration'], report.incoming.durations));
 
-    var options = {
-      'title':'Incoming Stream: Durations',
-      'width':400, 'height':300,
-      'orientation': 'horizontal',
-      'legend': {
-        'position': 'none'
-      },
-      'vAxis': {
-        'maxValue': 8
-      }
-    };
+      var options = {
+        'title':'Incoming Stream: Durations',
+        'width':400, 'height':300,
+        'orientation': 'horizontal',
+        'legend': {
+          'position': 'none'
+        },
+        'vAxis': {
+          'maxValue': 8
+        }
+      };
 
-    var chart = new google.visualization.BarChart(document.getElementById('incomingDurations'));
-    chart.draw(data, options);
+      var chart = new google.visualization.BarChart(document.getElementById('incomingDurations'));
+      chart.draw(data, options);
+    }
 
     /* ------------- */
 
-    data = google.visualization.arrayToDataTable(label(["Dataset", 'Duration'], report.outgoing.durations));
+    if(report.outgoing.durations.length==0)
+    {
+      $('#outgoingDurations').append('Insufficient outgoing stream duration data available.');
+    }
+    else
+    {
+      data = google.visualization.arrayToDataTable(label(["Dataset", 'Duration'], report.outgoing.durations));
 
-    options = {
-      'title':'Outgoing Stream: Durations',
-      'width':400, 'height':300,
-      'orientation': 'horizontal',
-      'legend': {
-        'position': 'none'
-      },
-      'vAxis': {
-        'maxValue': 8
-      }
-    };
+      options = {
+        'title':'Outgoing Stream: Durations',
+        'width':400, 'height':300,
+        'orientation': 'horizontal',
+        'legend': {
+          'position': 'none'
+        },
+        'vAxis': {
+          'maxValue': 8
+        }
+      };
 
-    chart = new google.visualization.BarChart(document.getElementById('outgoingDurations'));
-    chart.draw(data, options);
+      chart = new google.visualization.BarChart(document.getElementById('outgoingDurations'));
+      chart.draw(data, options);
+    }
 }
 
 function drawContentProbs(report)
@@ -231,6 +247,12 @@ function drawContentProbs(report)
 
 function drawFlow(report)
 {
+  if(report.incoming.flow.length==0)
+  {
+    $('#incomingFlow').append('Insufficient incoming flow data available.');
+  }
+  else
+  {
     var data = google.visualization.arrayToDataTable(label(["Dataset", 'Packets Per Second'], report.incoming.flow));
 
     var options = {
@@ -246,9 +268,16 @@ function drawFlow(report)
 
     var chart = new google.visualization.BarChart(document.getElementById('incomingFlow'));
     chart.draw(data, options);
+  }
 
     /* ------------- */
 
+  if(report.outgoing.flow.length==0)
+  {
+    $('#outgoingFlow').append('Insufficient outgoing flow data available.');
+  }
+  else
+  {
     data = google.visualization.arrayToDataTable(label(["Dataset", 'Packets Per Second'], report.outgoing.flow));
 
     options = {
@@ -264,4 +293,5 @@ function drawFlow(report)
 
     chart = new google.visualization.BarChart(document.getElementById('outgoingFlow'));
     chart.draw(data, options);
+  }
 }

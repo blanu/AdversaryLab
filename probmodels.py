@@ -67,11 +67,30 @@ class ProtocolModel(db.Model):
   content=db.ReferenceProperty(ContentModel, required=False)
   duration=db.ReferenceProperty(DurationModel, required=False)
 
+class AdversaryProtocolModel(db.Model):
+  adversary=db.ReferenceProperty(AdversaryModel, required=True)
+  label=db.BooleanProperty(required=True)
+  outgoing=db.BooleanProperty(required=True)
+  length=db.ReferenceProperty(LengthModel, required=False)
+  entropy=db.ReferenceProperty(EntropyModel, required=False)
+  flow=db.ReferenceProperty(FlowModel, required=False)
+  content=db.ReferenceProperty(ContentModel, required=False)
+  duration=db.ReferenceProperty(DurationModel, required=False)
+
 class PositionModel(db.Model):
   model=db.ReferenceProperty(ProtocolModel, required=True)
   position=db.IntegerProperty(required=True)
   previous=db.IntegerProperty(required=True)
   distribution=db.ReferenceProperty(Multinomial, required=True)
+
+class Fit(db.Model):
+  conn=db.ReferenceProperty(Connection, required=True)
+  model=db.ReferenceProperty(AdversaryProtocolModel, required=True)
+  length=db.FloatProperty(required=True)
+  entropy=db.FloatProperty(required=True)
+  flow=db.FloatProperty(required=True)
+  content=db.FloatProperty(required=True)
+  duration=db.FloatProperty(required=True)
 
 def fitLengthModel(lengths):
   if not lengths:
@@ -81,6 +100,8 @@ def fitLengthModel(lengths):
 
   if len(lengths)<3:
     return None
+
+  logging.info("fitting length with %d samples" % (len(lengths)))
 
   data={'samples': lengths, 'N': len(lengths)}
   fit=stan_cache('length.stan', data=data, iter=1000, chains=4)
@@ -101,7 +122,9 @@ def fitLengthModel(lengths):
   return model
 
 def fitDurationModel(lengths):
+  lengths=filter(checkEntropy, lengths)
   if not lengths or len(lengths)<3:
+    logging.error("Not enough samples for duration model")
     return None
 
   data={'samples': lengths, 'N': len(lengths)}
@@ -118,8 +141,11 @@ def fitDurationModel(lengths):
   return model
 
 def fitEntropyModel(samples):
+  logging.info("Not enough samples for entropy model")
   if not samples or len(samples)<3:
     return None
+
+  samples=filter(checkEntropy, samples)
 
   logging.info('Fitting entropy:')
   logging.info(samples)
@@ -137,6 +163,9 @@ def fitEntropyModel(samples):
   model=EntropyModel(distribution=normal)
   model.save()
   return model
+
+def checkEntropy(sample):
+  return sample>0
 
 def fitFlowModel(samples):
   if not samples or len(samples)<3:

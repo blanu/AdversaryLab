@@ -6,42 +6,28 @@
     <link href="/css/adLab.css" rel="stylesheet" type="text/css"/>
     <script src="/js/lib/polymer/components/platform/platform.js"></script>
     <link rel="import" href="/js/lib/polymer/components/font-roboto/roboto.html">
-    <link href='http://fonts.googleapis.com/css?family=Nunito:400,300' rel='stylesheet' type='text/css'>
   </head>
   <body fullbleed unresolved touch-action="auto">
     <core-scaffold>
       <core-header-panel navigation flex mode="seamed">
         <core-toolbar><img src="/static/images/A.png" width="27" height="40">  Adversary Lab  </core-toolbar>
-        <core-menu theme="core-light-theme" selected="0">
-  	      <core-item label="Upload Pcaps"></core-item>
-  	      <core-item label="Manage Datasets"><a href="/manageDatasets"></a></core-item>
-  	      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
-  	      <core-item label="Organize Pcaps"><a href="/organize"></a></core-item>
-          <core-item label="Adversaries"><a href="/adversaries"></a></core-item>
-        </core-menu>
+        <adversary-lab-menu selected="0"></adversary-lab-menu>
       </core-header-panel>
 
-      <div tool>Upload Pcaps</div>
-      <div id="content">
-        <div id="contentText">
-      	  <div class="smallText">Select a pcap file to run it against our simulated deep packet inspection filtering algorithms.  Specify the port that your traffic uses. The captured traffic will automatically be split into separate streams and extraneous traffic not using the specified port will be ignored. Traffic to the port will be marked as outgoing while traffic from that port will be marked as incoming.</div>
-        </div>
-    	  <br/>
-    	  <div class="holder">
-    	  	  <div id="contentText">
-    		  <div id="uploader">
-    			  <form enctype="multipart/form-data" method="post" data-bind="attr {action: uploadCode}">
-    				  <div class="rect">
-    					  <div class="choose">
-    						  <input id="pcapUpload" type="file" name="pcapFile"/>
-    						  <input id="port" name="port" label="Port" type="text"></input>
-    						  <button>Upload</button>
-    					  </div>
-              </div>
-            </form>
-          </div>
-    	  	  </div>
-        </div>
+      <div tool>Manage Adversaries</div>
+	    <div id="content">
+        <table>
+          <tbody id="adversaries" data-bind="foreach: adversaries">
+            <tr>
+              <td data-bind="text: name"></td>
+              <td><a class="adversaryLink" data-bind="attr {name: name}">View</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <paper-button id="addAdversary" label="Add adversary" raisedButton></paper-button>
+      </div>
+	    </div>
     </core-scaffold>
   </body>
 
@@ -54,6 +40,10 @@
   <link rel="import" href="/js/lib/polymer/components/core-selection/core-selection.html">
   <link rel="import" href="/js/lib/polymer/components/core-icons/core-icons.html">
   <link rel="import" href="/js/lib/polymer/components/paper-tabs/paper-tabs.html">
+  <link rel="import" href="/js/lib/polymer/components/paper-input/paper-input.html">
+  <link rel="import" href="/js/lib/polymer/components/paper-button/paper-button.html">
+
+  <link rel="import" href="/js/lib/adversary-lab/components/adversary-lab-menu/adversary-lab-menu.html">
 
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
@@ -62,5 +52,5 @@
   <script type="text/javascript" src="/js/lib/debug.js"></script>
   <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
   <script type="text/javascript" src="/js/login.js"></script>
-  <script type="text/javascript" src="/js/index.js"></script>
+  <script type="text/javascript" src="/js/manageAdversary.js"></script>
 </html>

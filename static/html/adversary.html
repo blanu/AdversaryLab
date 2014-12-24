@@ -1,0 +1,189 @@
+<html>
+  <head>
+    <title>Dashboard | AdversaryLab <span data-bind="text: adversary"></span></title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <link href="/css/polymer.css" rel="stylesheet" type="text/css"/>
+    <link href="/css/adLab.css" rel="stylesheet" type="text/css"/>
+    <script src="/js/lib/polymer/components/platform/platform.js"></script>
+    <link rel="import" href="/js/lib/polymer/components/font-roboto/roboto.html">
+  </head>
+  <body fullbleed unresolved touch-action="auto">
+    <core-scaffold>
+      <core-header-panel navigation flex mode="seamed">
+        <core-toolbar><img src="/static/images/A.png" width="27" height="40">  Adversary Lab  </core-toolbar>
+        <core-menu theme="core-light-theme" selected="1">
+  	      <core-item label="Upload Pcaps"><a href="/"></a></core-item>
+  	      <core-item label="Manage Datasets"></core-item>
+  	      <core-item label="Manage Protocols"><a href="/manageProtocols"></a></core-item>
+  	      <core-item label="Organize Pcaps"><a href="/organize"></a></core-item>
+          <core-item label="Adversaries"></core-item>
+        </core-menu>
+      </core-header-panel>
+
+      <div tool>Manage Adversary <span data-bind="text: adversary">temp</span></div>
+	    <div id="content">
+        <table>
+          <tr>
+            <td><paper-button id="trainButton" label="Train" raisedButton></paper-button></td>
+            <td><paper-button id="testButton" label="Test" raisedButton></paper-button></td>
+          </tr>
+        </table>
+        <table data-bind="if: emptyPositive">
+          <thead>
+            <tr>
+              <th>Positive Testing</th>
+            </tr>
+          </thead>
+          <tbody id="positive">
+            <tr>
+              <td>None</td>
+            </tr>
+          </tbody>
+        </table>
+        <table data-bind="ifnot: emptyPositive">
+          <thead>
+            <tr>
+              <th>Positive Testing</th>
+            </tr>
+          </thead>
+          <tbody id="positive" data-bind="foreach: positive">
+            <tr>
+              <td data-bind="text: name, attr {name: name}"></td><td><paper-button class="removeButton" label="Remove" raisedButton></paper-button></td>
+            </tr>
+          </tbody>
+        </table>
+        <br/>
+
+        <table data-bind="if: emptyNegative">
+          <thead>
+            <tr>
+              <th>Negative Testing</th>
+            </tr>
+          </thead>
+          <tbody id="negative">
+            <tr>
+              <td>None</td>
+            </tr>
+          </tbody>
+        </table>
+        <table data-bind="ifnot: emptyNegative">
+          <thead>
+            <tr>
+              <th>Negative Testing</th>
+            </tr>
+          </thead>
+          <tbody id="negative" data-bind="foreach: negative">
+            <tr>
+              <td data-bind="text: name, attr {name: name}"></td><td><paper-button class="removeButton" label="Remove" raisedButton></paper-button></td>
+            </tr>
+          </tbody>
+        </table>
+        <br/>
+
+        <table data-bind="if: emptyPositiveTraining">
+          <thead>
+            <tr>
+              <th>Positive Training</th>
+            </tr>
+          </thead>
+          <tbody id="positiveTraining">
+            <tr>
+              <td>None</td>
+            </tr>
+          </tbody>
+        </table>
+        <table data-bind="ifnot: emptyPositiveTraining">
+          <thead>
+            <tr>
+              <th>Positive Training</th>
+            </tr>
+          </thead>
+          <tbody id="positiveTraining" data-bind="foreach: positiveTraining">
+            <tr>
+              <td data-bind="text: name, attr {name: name}"></td><td><paper-button class="removeButton" label="Remove" raisedButton></paper-button></td>
+            </tr>
+          </tbody>
+        </table>
+        <br/>
+
+        <table data-bind="if: emptyNegativeTraining">
+          <thead>
+            <tr>
+              <th>Negative Training</th>
+            </tr>
+          </thead>
+          <tbody id="negativeTraining">
+            <tr>
+              <td>None</td>
+            </tr>
+          </tbody>
+        </table>
+        <table data-bind="ifnot: emptyNegativeTraining">
+          <thead>
+            <tr>
+              <th>Negative Training</th>
+            </tr>
+          </thead>
+          <tbody id="negativeTraining" data-bind="foreach: negativeTraining">
+            <tr>
+              <td data-bind="text: name, attr {name: name}"></td><td><paper-button class="removeButton" label="Remove" raisedButton></paper-button></td>
+            </tr>
+          </tbody>
+        </table>
+        <br/>
+
+        <table data-bind="if: emptyUnsorted">
+          <thead>
+            <tr>
+              <th>Unclassified</th>
+            </tr>
+          </thead>
+          <tbody id="unsorted">
+            <tr>
+              <td>None</td>
+            </tr>
+          </tbody>
+        </table>
+        <table data-bind="ifnot: emptyUnsorted">
+          <thead>
+            <tr>
+              <th>Unclassified</th>
+            </tr>
+          </thead>
+          <tbody id="unsorted" data-bind="foreach: unsorted">
+            <tr>
+              <td data-bind="text: name, attr {name: name}"></td>
+              <td><paper-button class="positiveButton" label="Positive Testing" raisedButton></paper-button></td>
+              <td><paper-button class="negativeButton" label="Negative Testing" raisedButton></paper-button></td>
+              <td><paper-button class="positiveTrainingButton" label="Positive Training" raisedButton></paper-button></td>
+              <td><paper-button class="negativeTrainingButton" label="Negative Training" raisedButton></paper-button></td>
+            </tr>
+          </tbody>
+        </table>
+        <br/>
+      </div>
+	    </div>
+    </core-scaffold>
+  </body>
+
+  <link rel="import" href="/js/lib/polymer/components/core-scaffold/core-scaffold.html">
+  <link rel="import" href="/js/lib/polymer/components/core-header-panel/core-header-panel.html">
+  <link rel="import" href="/js/lib/polymer/components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="/js/lib/polymer/components/core-menu/core-menu.html">
+  <link rel="import" href="/js/lib/polymer/components/core-item/core-item.html">
+  <link rel="import" href="/js/lib/polymer/components/core-selector/core-selector.html">
+  <link rel="import" href="/js/lib/polymer/components/core-selection/core-selection.html">
+  <link rel="import" href="/js/lib/polymer/components/core-icons/core-icons.html">
+  <link rel="import" href="/js/lib/polymer/components/paper-tabs/paper-tabs.html">
+  <link rel="import" href="/js/lib/polymer/components/paper-input/paper-input.html">
+  <link rel="import" href="/js/lib/polymer/components/paper-button/paper-button.html">
+
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+  <script type="text/javascript" src="/js/lib/knockout.js"></script>
+  <script type="text/javascript" src="/js/lib/jquery.query-object.js"></script>
+  <script type="text/javascript" src="/js/lib/debug.js"></script>
+  <script type="text/javascript" src="/js/lib/jsonrpc.js"></script>
+  <script type="text/javascript" src="/js/login.js"></script>
+  <script type="text/javascript" src="/js/adversary.js"></script>
+</html>

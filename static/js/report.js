@@ -23,6 +23,9 @@ $(document).ready(function() {
 
   google.setOnLoadCallback(function() {
     filekey=$.query.get('filekey');
+    $('#rerunButton').click(function() {
+      reports.rerunPcap(filekey);
+    });
     reports.getForPcap(filekey, function(result) {
       model.filename(result.filename);
       report=result;

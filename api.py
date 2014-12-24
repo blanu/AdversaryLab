@@ -8,7 +8,9 @@ from google.appengine.ext import deferred
 from rpc import JsonRpcService
 from models import *
 from probmodels import *
+from process import processPcap
 from processModel import generateModel
+from processAdversary import trainAdversaryByName, testAdversary
 
 def compileLengths(stream, result):
   lengths=result['lengths']
@@ -167,6 +169,152 @@ class DatasetService(JsonRpcService):
       results.append(prot.name)
     return results
 
+class AdversaryService(JsonRpcService):
+  def json_add(self, protocol):
+    logging.info('ACTION(Adversary): add')
+    user = users.get_current_user()
+    logging.info('rpc user '+str(user))
+
+    if not user:
+      return None
+
+    prot=AdversaryModel.all().filter("name =", protocol).get()
+    if prot:
+      return False
+    else:
+      prot=AdversaryModel(name=protocol)
+      prot.save()
+      return True
+
+  def json_delete(self, protocol):
+    logging.info('ACTION(Adversary): delete')
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    prot=AdversaryModel.all().filter("name =", protocol).get()
+    if prot:
+      prot.delete()
+      return True
+    else:
+      return False
+
+  def json_list(self):
+    logging.info('ACTION(Adversary): list')
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    results=[]
+    prots=AdversaryModel.all().run()
+    for prot in prots:
+      results.append(prot.name)
+    return results
+
+  def getSorted(self, name, training, label):
+    results=[]
+    adversary=AdversaryModel.all().filter("name =", name).get()
+    if adversary:
+      prots=LabeledData.all().filter("adversary =", adversary).filter("training =", training).filter("label =", label).run()
+      for prot in prots:
+        results.append(prot.pcap.filename)
+      return results
+    else:
+      return []
+
+  def getUnsorted(self, name):
+    names={}
+    pcaps=PcapFile.all().run()
+    for pcap in pcaps:
+      names[pcap.filename]=True
+    adversary=AdversaryModel.all().filter("name =", name).get()
+    if adversary:
+      prots=LabeledData.all().filter("adversary =", adversary).run()
+      for prot in prots:
+        if prot.pcap.filename in names:
+          del names[prot.pcap.filename]
+      return names.keys()
+    else:
+      return []
+
+  def getPcaps(self, name):
+    return {
+      'positive': self.getSorted(name, False, True),
+      'negative': self.getSorted(name, False, False),
+      'positiveTraining': self.getSorted(name, True, True),
+      'negativeTraining': self.getSorted(name, True, False),
+      'unsorted': self.getUnsorted(name)
+    }
+
+  def json_pcaps(self, name):
+    logging.info('ACTION(Adversary): sorted')
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    return self.getPcaps(name)
+
+  def json_sort(self, name, pcapName, training, label):
+    logging.info('ACTION(Adversary): sort')
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    results=[]
+    adversary=AdversaryModel.all().filter("name =", name).get()
+    pcap=PcapFile.all().filter('filename =', pcapName).get()
+    if adversary and pcap:
+      prot=LabeledData.all().filter("adversary =", adversary).filter("pcap =", pcap).filter("training =", training).filter("label =", label).get()
+      if prot:
+        prot.delete()
+      prot=LabeledData(adversary=adversary, pcap=pcap, training=training, label=label)
+      prot.save()
+
+    return self.getPcaps(name)
+
+  def json_unsort(self, name, pcapName):
+    logging.info('ACTION(Adversary): unsort')
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    results=[]
+    adversary=AdversaryModel.all().filter("name =", name).get()
+    pcap=PcapFile.all().filter('filename =', pcapName).get()
+    if adversary and pcap:
+      prot=LabeledData.all().filter("adversary =", adversary).filter("pcap =", pcap).get()
+      if prot:
+        prot.delete()
+
+    return self.getPcaps(name)
+
+  def json_train(self, name):
+    logging.info('ACTION(Adversary): train('+name+')')
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    deferred.defer(trainAdversaryByName, name)
+    #trainAdversaryByName(name)
+
+  def json_test(self, name):
+    logging.info('ACTION(Adversary): test')
+    user = users.get_current_user()
+
+    if not user:
+      return None
+
+    adversary=AdversaryModel.all().filter("name =", name).get()
+    if adversary:
+      deferred.defer(testAdversary, adversary)
+#      testAdversary(adversary)
+
 class PcapService(JsonRpcService):
   def json_delete(self, filekey):
     logging.info('ACTION(Pcap): delete')
@@ -270,28 +418,54 @@ class ProtocolStatInfo:
 def combineProtocol(pcaps):
   ipstat=ProtocolStatInfo()
   opstat=ProtocolStatInfo()
+  pageSize=500
   for pcap in pcaps:
-    for x in range(1500):
-      ipstat.sizes[x]=ipstat.sizes[x]+pcap.incomingStats.lengths[x]
-      opstat.sizes[x]=opstat.sizes[x]+pcap.outgoingStats.lengths[x]
-    for x in range(256):
-      ipstat.content[x]=ipstat.content[x]+pcap.incomingStats.content[x]
-      opstat.content[x]=opstat.content[x]+pcap.outgoingStats.content[x]
-    for d in pcap.incomingStats.durations:
-      ipstat.durations.append(d)
-    for d in pcap.outgoingStats.durations:
-      opstat.durations.append(d)
-    for e in pcap.incomingStats.entropies:
-      ipstat.entropies.append(e)
-    for e in pcap.outgoingStats.entropies:
-      opstat.entropies.append(e)
-    for count in pcap.incomingStats.flow:
-      ipstat.flow.append(count)
-    for count in pcap.outgoingStats.flow:
-      opstat.flow.append(count)
+    more=True
+    offset=0
+    while more:
+      conns=Connection.all().ancestor(pcap).fetch(pageSize, offset=offset)
+      offset=offset+pageSize
+      if not conns or len(conns)<pageSize:
+        more=False
+      for conn in conns:
+        for x in range(1500):
+          ipstat.sizes[x]=ipstat.sizes[x]+conn.incomingStats.lengths[x]
+          opstat.sizes[x]=opstat.sizes[x]+conn.outgoingStats.lengths[x]
+        for x in range(256):
+          ipstat.content[x]=ipstat.content[x]+conn.incomingStats.content[x]
+          opstat.content[x]=opstat.content[x]+conn.outgoingStats.content[x]
+        if conn.duration!=0:
+          ipstat.durations.append(conn.duration)
+          opstat.durations.append(conn.duration)
+        ipstat.entropies.append(conn.incomingStats.entropy)
+        opstat.entropies.append(conn.outgoingStats.entropy)
+        for count in conn.incomingStats.flow:
+          ipstat.flow.append(count)
+        for count in conn.outgoingStats.flow:
+          opstat.flow.append(count)
   return ipstat, opstat
 
 class ReportService(JsonRpcService):
+  def json_rerun(self):
+    logging.info('ACTION(Report): rerun')
+
+    pcaps=PcapFile.all().run()
+    for pcap in pcaps:
+      deferred.defer(processPcap, pcap.filekey.key())
+
+  def json_rerunPcap(self, filekey):
+    sort=False
+    user = users.get_current_user()
+    logging.info('ACTION(Report): getForPcap(%s, %s)' % (user, filekey))
+
+    if not user:
+      logging.error('User not logged in')
+      return None
+
+    pcap=PcapFile.all().filter("uploader =", user).filter("filekey =", filekey).get()
+    if pcap:
+      deferred.defer(processPcap, pcap.filekey.key())
+
   def json_getForPcap(self, filekey):
     sort=False
     user = users.get_current_user()
@@ -302,45 +476,46 @@ class ReportService(JsonRpcService):
       return None
 
     pcap=PcapFile.all().filter("uploader =", user).filter("filekey =", filekey).get()
-    if pcap and pcap.incomingStats and pcap.outgoingStats:
+    if pcap:
+      ipstat, opstat=combineProtocol([pcap])
       if sort:
         return {
           'filename': pcap.filename,
           'incoming': {
-            'lengths': sorted(pcap.incomingStats.lengths),
-            'content': sorted(pcap.incomingStats.content),
-            'entropy': sorted(pcap.incomingStats.entropies),
-            'durations': sorted(pcap.incomingStats.durations),
-            'flow': sorted(pcap.incomingStats.flow)
+            'lengths': sorted(ipstat.sizes),
+            'content': sorted(ipstat.content),
+            'entropy': sorted(ipstat.entropies),
+            'durations': sorted(ipstat.durations),
+            'flow': sorted(ipstat.flow)
           },
           'outgoing': {
-            'lengths': sorted(pcap.outgoingStats.lengths),
-            'content': sorted(pcap.outgoingStats.content),
-            'entropy': sorted(pcap.outgoingStats.entropies),
-            'durations': sorted(pcap.outgoingStats.durations),
-            'flow': sorted(pcap.outgoingStats.flow)
+            'lengths': sorted(opstat.sizes),
+            'content': sorted(opstat.content),
+            'entropy': sorted(opstat.entropies),
+            'durations': sorted(opstat.durations),
+            'flow': sorted(opstat.flow)
           }
         }
       else:
         return {
           'filename': pcap.filename,
           'incoming': {
-            'lengths': pcap.incomingStats.lengths,
-            'content': pcap.incomingStats.content,
-            'entropy': pcap.incomingStats.entropies,
-            'durations': pcap.incomingStats.durations,
-            'flow': pcap.incomingStats.flow
+            'lengths': ipstat.sizes,
+            'content': ipstat.content,
+            'entropy': ipstat.entropies,
+            'durations': ipstat.durations,
+            'flow': ipstat.flow
           },
           'outgoing': {
-            'lengths': pcap.outgoingStats.lengths,
-            'content': pcap.outgoingStats.content,
-            'entropy': pcap.outgoingStats.entropies,
-            'durations': pcap.outgoingStats.durations,
-            'flow': pcap.outgoingStats.flow
+            'lengths': opstat.sizes,
+            'content': opstat.content,
+            'entropy': opstat.entropies,
+            'durations': opstat.durations,
+            'flow': opstat.flow
           }
         }
     else:
-      logging.error('Pcap or stats were null %s %s %s' % (pcap, pcap.incomingStats, pcap.outgoingStats))
+      logging.error('Pcap or stats were null %s %s %s' % (pcap, ipstat, opstat))
       return None
 
   def json_getForProtocol(self, protocolName):
@@ -393,7 +568,7 @@ class ReportService(JsonRpcService):
             }
           }
       else:
-        logging.error('Pcap or stats were null %s %s %s' % (pcap, pcap.incomingStats, pcap.outgoingStats))
+        logging.error('Pcap or stats were null %s %s %s' % (pcap, ipstat, opstat))
         return None
 
   def json_getForDatasetAndProtocol(self, datasetName, protocolName):
@@ -450,7 +625,7 @@ class ReportService(JsonRpcService):
               }
             }
         else:
-          logging.error('Pcap or stats were null %s %s %s' % (pcap, pcap.incomingStats, pcap.outgoingStats))
+          logging.error('Pcap or stats were null %s %s %s' % (pcap, ipstat, opstat))
           return None
 
   def json_generateModel(self, datasetName, protocolName):

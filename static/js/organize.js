@@ -21,6 +21,10 @@ $(document).ready(function () {
 
   login(model);
 
+  $('#rerun').click(function() {
+    reports.rerun();
+  });
+
   protocol.list(function(results) {
     for(var index in results)
     {
